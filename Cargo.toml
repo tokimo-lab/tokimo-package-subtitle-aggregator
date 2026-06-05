@@ -2,7 +2,12 @@
 name = "subtitle-aggregator"
 version = "0.1.0"
 edition = "2021"
-description = "聚合多源字幕搜索与下载"
+description = "Aggregated subtitle search and download library (51+ sources)"
+license = "MIT"
+repository = "https://github.com/tokimo-lab/tokimo-package-subtitle-aggregator"
+homepage = "https://github.com/tokimo-lab/tokimo-package-subtitle-aggregator"
+keywords = ["subtitle", "search", "download", "aggregate", "media"]
+categories = ["multimedia"]
 
 [[bin]]
 name = "subtitle-aggregator"
