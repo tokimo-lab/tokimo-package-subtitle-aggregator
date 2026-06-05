@@ -16,10 +16,8 @@ pub struct Napisy24Provider {
 
 impl Napisy24Provider {
     pub fn new() -> Self {
-        let username =
-            std::env::var("NAPISY24_USER").unwrap_or_else(|_| "subliminal".into());
-        let password =
-            std::env::var("NAPISY24_PASS").unwrap_or_else(|_| "lanimilbus".into());
+        let username = std::env::var("NAPISY24_USER").unwrap_or_else(|_| "subliminal".into());
+        let password = std::env::var("NAPISY24_PASS").unwrap_or_else(|_| "lanimilbus".into());
         Self { username, password }
     }
 }
@@ -38,9 +36,7 @@ impl SubtitleProvider for Napisy24Provider {
             .file_hash
             .as_deref()
             .ok_or("napisy24: file_hash is required")?;
-        let file_size = request
-            .file_size
-            .ok_or("napisy24: file_size is required")?;
+        let file_size = request.file_size.ok_or("napisy24: file_size is required")?;
         let filename = request
             .query
             .clone()

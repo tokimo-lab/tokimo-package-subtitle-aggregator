@@ -18,7 +18,10 @@ fn parse_season_episode(s: &str) -> (u32, u32) {
             let season_str = &upper[s_pos + 1..s_pos + e_pos];
             let episode_str = &upper[s_pos + e_pos + 1..];
             // episode_str may have trailing non-digit characters
-            let episode_digits: String = episode_str.chars().take_while(|c| c.is_ascii_digit()).collect();
+            let episode_digits: String = episode_str
+                .chars()
+                .take_while(|c| c.is_ascii_digit())
+                .collect();
             let season = season_str.parse::<u32>().unwrap_or(1);
             let episode = episode_digits.parse::<u32>().unwrap_or(1);
             return (season, episode);
@@ -99,10 +102,14 @@ impl SubtitleProvider for HosszupuskaProvider {
 
         // Find rows that contain the subtitle indicator
         // Rows that match: tr containing `this.style.backgroundImage='url(css/over2.jpg)`
-        let row_sel = Selector::parse("tr").map_err(|e| format!("hosszupuska: selector error: {e}"))?;
-        let td_sel = Selector::parse("td").map_err(|e| format!("hosszupuska: selector error: {e}"))?;
-        let img_sel = Selector::parse("img").map_err(|e| format!("hosszupuska: selector error: {e}"))?;
-        let a_sel = Selector::parse("a").map_err(|e| format!("hosszupuska: selector error: {e}"))?;
+        let row_sel =
+            Selector::parse("tr").map_err(|e| format!("hosszupuska: selector error: {e}"))?;
+        let td_sel =
+            Selector::parse("td").map_err(|e| format!("hosszupuska: selector error: {e}"))?;
+        let img_sel =
+            Selector::parse("img").map_err(|e| format!("hosszupuska: selector error: {e}"))?;
+        let a_sel =
+            Selector::parse("a").map_err(|e| format!("hosszupuska: selector error: {e}"))?;
 
         let mut results = Vec::new();
 
@@ -165,7 +172,11 @@ impl SubtitleProvider for HosszupuskaProvider {
                 id: sub_id,
                 name: title.clone(),
                 language: language.to_string(),
-                language_name: if language == "hu" { "Hungarian".into() } else { "English".into() },
+                language_name: if language == "hu" {
+                    "Hungarian".into()
+                } else {
+                    "English".into()
+                },
                 format: "srt".into(),
                 provider: "hosszupuska".into(),
                 detail_path: None,

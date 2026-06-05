@@ -160,9 +160,7 @@ impl SubtitleProvider for SubxProvider {
             .download_path
             .as_deref()
             .map(|p| p.to_string())
-            .unwrap_or_else(|| {
-                format!("{}/{}/download", SUBX_API_BASE, request.subtitle_id)
-            });
+            .unwrap_or_else(|| format!("{}/{}/download", SUBX_API_BASE, request.subtitle_id));
 
         let client = reqwest::Client::builder()
             .user_agent("subtitle-aggregator/0.1")

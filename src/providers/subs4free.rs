@@ -6,8 +6,8 @@ use scraper::{Html, Selector};
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const SUBS4FREE_BASE: &str = "https://www.subs4free.info";
@@ -44,13 +44,11 @@ impl SubtitleProvider for Subs4FreeProvider {
         &self,
         request: &SubtitleSearchRequest,
     ) -> Result<Vec<SubtitleSearchResult>, String> {
-        let query = request
-            .query
-            .as_deref()
-            .ok_or("subs4free requires query")?;
+        let query = request.query.as_deref().ok_or("subs4free requires query")?;
 
         let encoded = url::form_urlencoded::byte_serialize(query.as_bytes()).collect::<String>();
-        let search_url = format!("{SUBS4FREE_BASE}/search_report.php?search={encoded}&searchType=1");
+        let search_url =
+            format!("{SUBS4FREE_BASE}/search_report.php?search={encoded}&searchType=1");
 
         let client = build_client()?;
         let resp = client
@@ -99,7 +97,10 @@ impl SubtitleProvider for Subs4FreeProvider {
             .map_err(|e| format!("subs4free show request failed: {e}"))?;
 
         if !show_resp.status().is_success() {
-            return Err(format!("subs4free show request failed: {}", show_resp.status()));
+            return Err(format!(
+                "subs4free show request failed: {}",
+                show_resp.status()
+            ));
         }
 
         let show_html = show_resp
@@ -162,7 +163,10 @@ impl SubtitleProvider for Subs4FreeProvider {
 
             let id = format!(
                 "subs4free-{}",
-                href.trim_end_matches('/').rsplit('/').next().unwrap_or(&version)
+                href.trim_end_matches('/')
+                    .rsplit('/')
+                    .next()
+                    .unwrap_or(&version)
             );
 
             results.push(SubtitleSearchResult {
@@ -242,6 +246,12 @@ impl SubtitleProvider for Subs4FreeProvider {
             .await
             .map_err(|e| format!("subs4free read content error: {e}"))?;
 
-        extract_archive(&content, "subtitle.zip", &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            "subtitle.zip",
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

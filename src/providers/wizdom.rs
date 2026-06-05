@@ -6,8 +6,8 @@ use regex::Regex;
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const WIZDOM_BASE: &str = "http://wizdom.xyz";
@@ -79,13 +79,9 @@ async fn get_imdb_id_from_tmdb(
 
     // Get IMDB ID from TMDB
     let ext_url = if is_tv {
-        format!(
-            "http://api.tmdb.org/3/tv/{tmdb_id}/external_ids?api_key={TMDB_API_KEY}"
-        )
+        format!("http://api.tmdb.org/3/tv/{tmdb_id}/external_ids?api_key={TMDB_API_KEY}")
     } else {
-        format!(
-            "http://api.tmdb.org/3/movie/{tmdb_id}?api_key={TMDB_API_KEY}"
-        )
+        format!("http://api.tmdb.org/3/movie/{tmdb_id}?api_key={TMDB_API_KEY}")
     };
 
     let ext_resp = client
@@ -95,7 +91,10 @@ async fn get_imdb_id_from_tmdb(
         .map_err(|e| format!("wizdom TMDB external_ids failed: {e}"))?;
 
     if !ext_resp.status().is_success() {
-        return Err(format!("wizdom TMDB external_ids failed: {}", ext_resp.status()));
+        return Err(format!(
+            "wizdom TMDB external_ids failed: {}",
+            ext_resp.status()
+        ));
     }
 
     let ext_json: serde_json::Value = ext_resp
@@ -176,17 +175,13 @@ impl SubtitleProvider for WizdomProvider {
                         .map(|v| v.to_string())
                         .or_else(|| sub["id"].as_str().map(|s| s.to_string()))
                         .unwrap_or_default();
-                    let version = sub["version"]
-                        .as_str()
-                        .unwrap_or("")
-                        .to_string();
+                    let version = sub["version"].as_str().unwrap_or("").to_string();
 
                     if subtitle_id.is_empty() {
                         continue;
                     }
 
-                    let download_path =
-                        format!("{WIZDOM_BASE}/api/files/sub/{subtitle_id}");
+                    let download_path = format!("{WIZDOM_BASE}/api/files/sub/{subtitle_id}");
 
                     results.push(SubtitleSearchResult {
                         id: format!("wizdom-{subtitle_id}"),
@@ -213,17 +208,13 @@ impl SubtitleProvider for WizdomProvider {
                         .map(|v| v.to_string())
                         .or_else(|| sub["id"].as_str().map(|s| s.to_string()))
                         .unwrap_or_default();
-                    let version = sub["version"]
-                        .as_str()
-                        .unwrap_or("")
-                        .to_string();
+                    let version = sub["version"].as_str().unwrap_or("").to_string();
 
                     if subtitle_id.is_empty() {
                         continue;
                     }
 
-                    let download_path =
-                        format!("{WIZDOM_BASE}/api/files/sub/{subtitle_id}");
+                    let download_path = format!("{WIZDOM_BASE}/api/files/sub/{subtitle_id}");
 
                     results.push(SubtitleSearchResult {
                         id: format!("wizdom-{subtitle_id}"),
@@ -272,6 +263,12 @@ impl SubtitleProvider for WizdomProvider {
             .await
             .map_err(|e| format!("wizdom read content error: {e}"))?;
 
-        extract_archive(&content, "subtitle.zip", &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            "subtitle.zip",
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

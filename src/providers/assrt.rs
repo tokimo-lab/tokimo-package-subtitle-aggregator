@@ -1,16 +1,16 @@
 use std::path::{Path, PathBuf};
 
+use super::SubtitleProvider;
+use crate::archive::extract_archive;
+use crate::models::{
+    matches_preferred_language, normalize_format, normalize_language, score_subtitle_name,
+    DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult,
+};
 use async_trait::async_trait;
 use regex::Regex;
 use reqwest::header::{ACCEPT, REFERER};
 use scraper::{Html, Selector};
 use tokio::{fs, process::Command};
-use super::SubtitleProvider;
-use crate::archive::extract_archive;
-use crate::models::{
-    normalize_format, normalize_language, matches_preferred_language, score_subtitle_name,
-    DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult,
-};
 
 const ASSRT_BASE_URL: &str = "https://assrt.net";
 const ASSRT_USER_AGENT: &str =
@@ -384,9 +384,8 @@ impl SubtitleProvider for AssrtProvider {
             .map_err(|error| format!("解析 assrt 元数据选择器失败: {error}"))?;
         let version_selector = Selector::parse("#meta_top b")
             .map_err(|error| format!("解析 assrt 版本选择器失败: {error}"))?;
-        let rating_selector =
-            Selector::parse(r#"img[alt*="用户评分"], img[title*="用户评分"]"#)
-                .map_err(|error| format!("解析 assrt 评分选择器失败: {error}"))?;
+        let rating_selector = Selector::parse(r#"img[alt*="用户评分"], img[title*="用户评分"]"#)
+            .map_err(|error| format!("解析 assrt 评分选择器失败: {error}"))?;
         let detail_id_regex = Regex::new(r"/(\d+)\.xml$")
             .map_err(|error| format!("detail id regex failed: {error}"))?;
         let download_regex = Regex::new(r"location\.href='([^']+)'")
@@ -455,11 +454,9 @@ impl SubtitleProvider for AssrtProvider {
                         .map(str::to_string)
                 })
                 .and_then(|text| {
-                    number_regex
-                        .captures(&text)
-                        .and_then(|captures| {
-                            captures.get(1).map(|value| value.as_str().to_string())
-                        })
+                    number_regex.captures(&text).and_then(|captures| {
+                        captures.get(1).map(|value| value.as_str().to_string())
+                    })
                 })
                 .and_then(|value| value.parse::<f64>().ok());
             let download_path = download_regex

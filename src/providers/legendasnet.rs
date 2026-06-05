@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
-use crate::models::{DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult};
+use crate::models::{
+    DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult,
+};
 
 const SERVER_HOSTNAME: &str = "legendas.net/api";
 const UA: &str = "Sub-Zero/2";
@@ -119,10 +121,13 @@ async fn login(client: &reqwest::Client, email: &str, password: &str) -> Result<
         ));
     }
 
-    let body: LoginResponse = resp.json().await
+    let body: LoginResponse = resp
+        .json()
+        .await
         .map_err(|e| format!("legendasnet: parse login response: {e}"))?;
 
-    body.access_token.ok_or_else(|| "legendasnet: access token not found in login response".into())
+    body.access_token
+        .ok_or_else(|| "legendasnet: access token not found in login response".into())
 }
 
 fn is_forced(item: &SubtitleItem) -> bool {
@@ -144,7 +149,9 @@ pub struct LegendasNetProvider {
 
 impl LegendasNetProvider {
     pub fn new(staging_root: impl Into<std::path::PathBuf>) -> Self {
-        Self { staging_root: staging_root.into() }
+        Self {
+            staging_root: staging_root.into(),
+        }
     }
 }
 
@@ -154,7 +161,10 @@ impl SubtitleProvider for LegendasNetProvider {
         "legendasnet"
     }
 
-    async fn search(&self, request: &SubtitleSearchRequest) -> Result<Vec<SubtitleSearchResult>, String> {
+    async fn search(
+        &self,
+        request: &SubtitleSearchRequest,
+    ) -> Result<Vec<SubtitleSearchResult>, String> {
         let (email, password) = get_credentials()?;
         let client = build_client()?;
         let token = login(&client, &email, &password).await?;
@@ -197,12 +207,22 @@ impl SubtitleProvider for LegendasNetProvider {
                 .map_err(|e| format!("legendasnet: TV search request: {e}"))?;
 
             let status = resp.status().as_u16();
-            if status == 403 { return Err("legendasnet: invalid access token".into()); }
-            if status == 429 { return Err("legendasnet: too many requests (429)".into()); }
-            if status == 404 { return Ok(vec![]); }
-            if status != 200 { return Err(format!("legendasnet: TV search HTTP {status}")); }
+            if status == 403 {
+                return Err("legendasnet: invalid access token".into());
+            }
+            if status == 429 {
+                return Err("legendasnet: too many requests (429)".into());
+            }
+            if status == 404 {
+                return Ok(vec![]);
+            }
+            if status != 200 {
+                return Err(format!("legendasnet: TV search HTTP {status}"));
+            }
 
-            let body: TvSearchResponse = resp.json().await
+            let body: TvSearchResponse = resp
+                .json()
+                .await
                 .map_err(|e| format!("legendasnet: parse TV search: {e}"))?;
 
             if body.success == Some(false) || body.status == Some(false) {
@@ -215,10 +235,19 @@ impl SubtitleProvider for LegendasNetProvider {
                 let release = item.release_name.clone().unwrap_or_default();
                 let uploader = item.uploader.clone().unwrap_or_else(|| "unknown".into());
                 let download_path = item.path.clone().unwrap_or_default();
-                let tmdb_id = item.tmdb_id.as_ref().map(|v| v.to_string()).unwrap_or_default();
-                let page_link = format!("https://legendas.net/tv_legenda?movie_id={tmdb_id}&legenda_id={id}");
+                let tmdb_id = item
+                    .tmdb_id
+                    .as_ref()
+                    .map(|v| v.to_string())
+                    .unwrap_or_default();
+                let page_link =
+                    format!("https://legendas.net/tv_legenda?movie_id={tmdb_id}&legenda_id={id}");
                 let lang = if forced { "pt-forced" } else { "pt-BR" };
-                let lang_name = if forced { "Portuguese (Forced)" } else { "Portuguese (Brazilian)" };
+                let lang_name = if forced {
+                    "Portuguese (Forced)"
+                } else {
+                    "Portuguese (Brazilian)"
+                };
 
                 results.push(SubtitleSearchResult {
                     id: id.clone(),
@@ -252,12 +281,22 @@ impl SubtitleProvider for LegendasNetProvider {
                 .map_err(|e| format!("legendasnet: movie search request: {e}"))?;
 
             let status = resp.status().as_u16();
-            if status == 403 { return Err("legendasnet: invalid access token".into()); }
-            if status == 429 { return Err("legendasnet: too many requests (429)".into()); }
-            if status == 404 { return Ok(vec![]); }
-            if status != 200 { return Err(format!("legendasnet: movie search HTTP {status}")); }
+            if status == 403 {
+                return Err("legendasnet: invalid access token".into());
+            }
+            if status == 429 {
+                return Err("legendasnet: too many requests (429)".into());
+            }
+            if status == 404 {
+                return Ok(vec![]);
+            }
+            if status != 200 {
+                return Err(format!("legendasnet: movie search HTTP {status}"));
+            }
 
-            let body: MovieSearchResponse = resp.json().await
+            let body: MovieSearchResponse = resp
+                .json()
+                .await
                 .map_err(|e| format!("legendasnet: parse movie search: {e}"))?;
 
             if body.success == Some(false) || body.status == Some(false) {
@@ -270,10 +309,19 @@ impl SubtitleProvider for LegendasNetProvider {
                 let release = item.release_name.clone().unwrap_or_default();
                 let uploader = item.uploader.clone().unwrap_or_else(|| "unknown".into());
                 let download_path = item.path.clone().unwrap_or_default();
-                let tmdb_id = item.tmdb_id.as_ref().map(|v| v.to_string()).unwrap_or_default();
-                let page_link = format!("https://legendas.net/legenda?movie_id={tmdb_id}&legenda_id={id}");
+                let tmdb_id = item
+                    .tmdb_id
+                    .as_ref()
+                    .map(|v| v.to_string())
+                    .unwrap_or_default();
+                let page_link =
+                    format!("https://legendas.net/legenda?movie_id={tmdb_id}&legenda_id={id}");
                 let lang = if forced { "pt-forced" } else { "pt-BR" };
-                let lang_name = if forced { "Portuguese (Forced)" } else { "Portuguese (Brazilian)" };
+                let lang_name = if forced {
+                    "Portuguese (Forced)"
+                } else {
+                    "Portuguese (Brazilian)"
+                };
 
                 results.push(SubtitleSearchResult {
                     id: id.clone(),
@@ -292,16 +340,25 @@ impl SubtitleProvider for LegendasNetProvider {
             }
         }
 
-        tracing::info!("legendasnet: found {} results for '{}'", results.len(), query);
+        tracing::info!(
+            "legendasnet: found {} results for '{}'",
+            results.len(),
+            query
+        );
         Ok(results)
     }
 
-    async fn download(&self, request: &SubtitleDownloadRequest) -> Result<DownloadedSubtitle, String> {
+    async fn download(
+        &self,
+        request: &SubtitleDownloadRequest,
+    ) -> Result<DownloadedSubtitle, String> {
         let (email, password) = get_credentials()?;
         let client = build_client()?;
         let token = login(&client, &email, &password).await?;
 
-        let url = request.download_path.as_deref()
+        let url = request
+            .download_path
+            .as_deref()
             .or(request.detail_path.as_deref())
             .ok_or("legendasnet: download requires download_path")?;
 
@@ -313,11 +370,20 @@ impl SubtitleProvider for LegendasNetProvider {
             .map_err(|e| format!("legendasnet: download request: {e}"))?;
 
         let status = resp.status().as_u16();
-        if status == 429 { return Err("legendasnet: daily download limit exceeded".into()); }
-        if status == 403 { return Err("legendasnet: invalid access token".into()); }
-        if status != 200 { return Err(format!("legendasnet: download HTTP {status}")); }
+        if status == 429 {
+            return Err("legendasnet: daily download limit exceeded".into());
+        }
+        if status == 403 {
+            return Err("legendasnet: invalid access token".into());
+        }
+        if status != 200 {
+            return Err(format!("legendasnet: download HTTP {status}"));
+        }
 
-        let bytes = resp.bytes().await.map_err(|e| format!("legendasnet: read bytes: {e}"))?;
+        let bytes = resp
+            .bytes()
+            .await
+            .map_err(|e| format!("legendasnet: read bytes: {e}"))?;
         let filename = url.rsplit('/').next().unwrap_or("subtitle.zip").to_string();
 
         if bytes.starts_with(b"PK") || filename.ends_with(".zip") {

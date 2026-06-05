@@ -28,10 +28,7 @@ impl SubtitleProvider for NekurProvider {
         &self,
         request: &SubtitleSearchRequest,
     ) -> Result<Vec<SubtitleSearchResult>, String> {
-        let title = request
-            .query
-            .as_deref()
-            .ok_or("nekur: query is required")?;
+        let title = request.query.as_deref().ok_or("nekur: query is required")?;
 
         let client = reqwest::Client::builder()
             .user_agent("subtitle-aggregator/0.1")
@@ -58,14 +55,14 @@ impl SubtitleProvider for NekurProvider {
 
         let document = Html::parse_document(&html);
 
-        let row_sel = Selector::parse("tbody > tr")
-            .map_err(|e| format!("nekur: selector error: {e}"))?;
-        let title_sel = Selector::parse(".title > a")
-            .map_err(|e| format!("nekur: selector error: {e}"))?;
-        let year_sel = Selector::parse(".year")
-            .map_err(|e| format!("nekur: selector error: {e}"))?;
-        let notes_sel = Selector::parse(".notes")
-            .map_err(|e| format!("nekur: selector error: {e}"))?;
+        let row_sel =
+            Selector::parse("tbody > tr").map_err(|e| format!("nekur: selector error: {e}"))?;
+        let title_sel =
+            Selector::parse(".title > a").map_err(|e| format!("nekur: selector error: {e}"))?;
+        let year_sel =
+            Selector::parse(".year").map_err(|e| format!("nekur: selector error: {e}"))?;
+        let notes_sel =
+            Selector::parse(".notes").map_err(|e| format!("nekur: selector error: {e}"))?;
 
         let mut results = Vec::new();
 

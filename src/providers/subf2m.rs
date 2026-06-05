@@ -205,8 +205,8 @@ impl SubtitleProvider for Subf2mProvider {
         };
 
         // Step 1: search for movie slugs
-        let encoded_query = url::form_urlencoded::byte_serialize(query.as_bytes())
-            .collect::<String>();
+        let encoded_query =
+            url::form_urlencoded::byte_serialize(query.as_bytes()).collect::<String>();
         let search_url = format!("{BASE_URL}/subtitles/searchbytitle?query={encoded_query}&l=");
 
         let search_html = safe_get_text(&client, &search_url).await?;
@@ -256,8 +256,8 @@ impl SubtitleProvider for Subf2mProvider {
                     .to_string();
 
                     // Guess format from release name
-                    let format = normalize_format(release_name)
-                        .unwrap_or_else(|| "srt".to_string());
+                    let format =
+                        normalize_format(release_name).unwrap_or_else(|| "srt".to_string());
 
                     let download_path = if dl_href.starts_with("http") {
                         dl_href.clone()
@@ -317,9 +317,7 @@ impl SubtitleProvider for Subf2mProvider {
                 .select(&sel)
                 .next()
                 .and_then(|a| a.value().attr("href"))
-                .ok_or_else(|| {
-                    format!("subf2m: couldn't find download button on {detail}")
-                })?;
+                .ok_or_else(|| format!("subf2m: couldn't find download button on {detail}"))?;
             if href.starts_with("http") {
                 href.to_string()
             } else {
@@ -348,17 +346,16 @@ impl SubtitleProvider for Subf2mProvider {
             .and_then(|v| v.to_str().ok())
             .and_then(|v| {
                 // filename="foo.zip" or filename=foo.zip
-                v.split(';')
-                    .find_map(|part| {
-                        let part = part.trim();
-                        if part.to_ascii_lowercase().starts_with("filename") {
-                            part.splitn(2, '=')
-                                .nth(1)
-                                .map(|s| s.trim().trim_matches('"').to_string())
-                        } else {
-                            None
-                        }
-                    })
+                v.split(';').find_map(|part| {
+                    let part = part.trim();
+                    if part.to_ascii_lowercase().starts_with("filename") {
+                        part.splitn(2, '=')
+                            .nth(1)
+                            .map(|s| s.trim().trim_matches('"').to_string())
+                    } else {
+                        None
+                    }
+                })
             })
             .unwrap_or_else(|| format!("subf2m_{}.zip", request.subtitle_id));
 

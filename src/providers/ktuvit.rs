@@ -6,8 +6,8 @@ use scraper::{Html, Selector};
 
 use super::SubtitleProvider;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const KTUVIT_BASE: &str = "https://www.ktuvit.me/";
@@ -100,15 +100,12 @@ impl SubtitleProvider for KtuvitProvider {
         &self,
         request: &SubtitleSearchRequest,
     ) -> Result<Vec<SubtitleSearchResult>, String> {
-        let email = std::env::var("KTUVIT_USER")
-            .map_err(|_| "ktuvit: KTUVIT_USER env var not set")?;
-        let password = std::env::var("KTUVIT_PASS")
-            .map_err(|_| "ktuvit: KTUVIT_PASS env var not set")?;
+        let email =
+            std::env::var("KTUVIT_USER").map_err(|_| "ktuvit: KTUVIT_USER env var not set")?;
+        let password =
+            std::env::var("KTUVIT_PASS").map_err(|_| "ktuvit: KTUVIT_PASS env var not set")?;
 
-        let query = request
-            .query
-            .as_deref()
-            .ok_or("ktuvit requires query")?;
+        let query = request.query.as_deref().ok_or("ktuvit requires query")?;
 
         let se_opt = parse_season_episode(query);
         let is_tv = se_opt.is_some();
@@ -119,9 +116,7 @@ impl SubtitleProvider for KtuvitProvider {
         let client = ktuvit_login(&email, &password).await?;
 
         // Search for films
-        let search_url = format!(
-            "{KTUVIT_BASE}Services/ContentProvider.svc/SearchPage_search"
-        );
+        let search_url = format!("{KTUVIT_BASE}Services/ContentProvider.svc/SearchPage_search");
         let search_type = if is_tv { "1" } else { "0" };
         let search_body = serde_json::json!({
             "request": {
@@ -228,8 +223,8 @@ impl SubtitleProvider for KtuvitProvider {
 
         if is_tv {
             // TV: parse tr rows, column 0=release, column 5 has input[data-sub-id]
-            let tr_sel = Selector::parse("tbody > tr")
-                .map_err(|e| format!("ktuvit selector error: {e}"))?;
+            let tr_sel =
+                Selector::parse("tbody > tr").map_err(|e| format!("ktuvit selector error: {e}"))?;
             let td_sel =
                 Selector::parse("td").map_err(|e| format!("ktuvit selector error: {e}"))?;
             let input_sel = Selector::parse("input[data-sub-id]")
@@ -319,10 +314,10 @@ impl SubtitleProvider for KtuvitProvider {
         &self,
         request: &SubtitleDownloadRequest,
     ) -> Result<DownloadedSubtitle, String> {
-        let email = std::env::var("KTUVIT_USER")
-            .map_err(|_| "ktuvit: KTUVIT_USER env var not set")?;
-        let password = std::env::var("KTUVIT_PASS")
-            .map_err(|_| "ktuvit: KTUVIT_PASS env var not set")?;
+        let email =
+            std::env::var("KTUVIT_USER").map_err(|_| "ktuvit: KTUVIT_USER env var not set")?;
+        let password =
+            std::env::var("KTUVIT_PASS").map_err(|_| "ktuvit: KTUVIT_PASS env var not set")?;
 
         let download_path = request
             .download_path
@@ -341,9 +336,7 @@ impl SubtitleProvider for KtuvitProvider {
         let client = ktuvit_login(&email, &password).await?;
 
         // Request download identifier
-        let req_url = format!(
-            "{KTUVIT_BASE}Services/ContentProvider.svc/RequestSubtitleDownload"
-        );
+        let req_url = format!("{KTUVIT_BASE}Services/ContentProvider.svc/RequestSubtitleDownload");
         let body = serde_json::json!({
             "request": {
                 "FilmID": ktuvit_id,
@@ -362,7 +355,10 @@ impl SubtitleProvider for KtuvitProvider {
             .map_err(|e| format!("ktuvit download request failed: {e}"))?;
 
         if !req_resp.status().is_success() {
-            return Err(format!("ktuvit download request failed: {}", req_resp.status()));
+            return Err(format!(
+                "ktuvit download request failed: {}",
+                req_resp.status()
+            ));
         }
 
         let req_text = req_resp
@@ -383,9 +379,8 @@ impl SubtitleProvider for KtuvitProvider {
             .ok_or("ktuvit download: missing DownloadIdentifier")?
             .to_string();
 
-        let file_url = format!(
-            "{KTUVIT_BASE}Services/DownloadFile.ashx?DownloadIdentifier={identifier}"
-        );
+        let file_url =
+            format!("{KTUVIT_BASE}Services/DownloadFile.ashx?DownloadIdentifier={identifier}");
 
         let file_resp = client
             .get(&file_url)
@@ -394,7 +389,10 @@ impl SubtitleProvider for KtuvitProvider {
             .map_err(|e| format!("ktuvit file download failed: {e}"))?;
 
         if !file_resp.status().is_success() {
-            return Err(format!("ktuvit file download failed: {}", file_resp.status()));
+            return Err(format!(
+                "ktuvit file download failed: {}",
+                file_resp.status()
+            ));
         }
 
         let content = file_resp

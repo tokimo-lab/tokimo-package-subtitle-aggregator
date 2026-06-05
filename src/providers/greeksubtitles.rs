@@ -6,8 +6,8 @@ use scraper::{Html, Selector};
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const GREEKSUBTITLES_BASE: &str = "http://gr.greek-subtitles.com/";
@@ -84,18 +84,19 @@ async fn fetch_page(
             .next()
             .and_then(|img| img.value().attr("src"))
             .and_then(|src| src.rsplit('/').next())
-            .map(|fname| fname.trim_end_matches(".png").trim_end_matches(".gif").to_lowercase())
+            .map(|fname| {
+                fname
+                    .trim_end_matches(".png")
+                    .trim_end_matches(".gif")
+                    .to_lowercase()
+            })
             .unwrap_or_else(|| "el".to_string());
 
         if !matches_preferred_language(&lang_code, requested_languages) {
             continue;
         }
 
-        let version = cell
-            .text()
-            .collect::<String>()
-            .trim()
-            .to_string();
+        let version = cell.text().collect::<String>().trim().to_string();
 
         let download_path = format!("{GREEKSUBTITLES_DL_BASE}{subtitle_id}");
         let id = format!("greeksubtitles-{subtitle_id}");
@@ -117,13 +118,15 @@ async fn fetch_page(
     }
 
     // Check for next page
-    let a_sel =
-        Selector::parse("a").map_err(|e| format!("greeksubtitles selector error: {e}"))?;
+    let a_sel = Selector::parse("a").map_err(|e| format!("greeksubtitles selector error: {e}"))?;
     let next_url = document.select(&a_sel).find_map(|a| {
         let text = a.text().collect::<String>();
         let href = a.value().attr("href").unwrap_or("");
         if text.contains("Next") && href.contains("search.php") {
-            Some(format!("{GREEKSUBTITLES_BASE}{}", href.trim_start_matches('/')))
+            Some(format!(
+                "{GREEKSUBTITLES_BASE}{}",
+                href.trim_start_matches('/')
+            ))
         } else {
             None
         }
@@ -187,6 +190,12 @@ impl SubtitleProvider for GreekSubtitlesProvider {
             .await
             .map_err(|e| format!("greeksubtitles read content error: {e}"))?;
 
-        extract_archive(&content, "subtitle.zip", &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            "subtitle.zip",
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

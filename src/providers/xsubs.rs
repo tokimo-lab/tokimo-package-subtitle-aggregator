@@ -5,8 +5,8 @@ use regex::Regex;
 
 use super::SubtitleProvider;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const XSUBS_BASE: &str = "http://xsubs.tv";
@@ -32,10 +32,7 @@ fn build_client() -> Result<reqwest::Client, String> {
         .cookie_store(true);
 
     // Optional basic auth via env vars
-    if let (Ok(user), Ok(pass)) = (
-        std::env::var("XSUBS_USER"),
-        std::env::var("XSUBS_PASS"),
-    ) {
+    if let (Ok(user), Ok(pass)) = (std::env::var("XSUBS_USER"), std::env::var("XSUBS_PASS")) {
         // Some xsubs setups use HTTP basic auth; provide as default headers if needed
         let _ = (user, pass); // Store for potential future use
     }
@@ -46,7 +43,8 @@ fn build_client() -> Result<reqwest::Client, String> {
 }
 
 fn sanitize_title(title: &str) -> String {
-    title.to_lowercase()
+    title
+        .to_lowercase()
         .chars()
         .filter(|c| c.is_alphanumeric() || c.is_whitespace())
         .collect::<String>()
@@ -90,10 +88,7 @@ impl SubtitleProvider for XSubsProvider {
         &self,
         request: &SubtitleSearchRequest,
     ) -> Result<Vec<SubtitleSearchResult>, String> {
-        let query = request
-            .query
-            .as_deref()
-            .ok_or("xsubs requires query")?;
+        let query = request.query.as_deref().ok_or("xsubs requires query")?;
 
         let (season, episode) = parse_season_episode(query)
             .ok_or("xsubs: query must contain season/episode pattern (e.g. S01E02)")?;
@@ -109,8 +104,7 @@ impl SubtitleProvider for XSubsProvider {
         let all_xml = fetch_text(&client, &all_series_url).await?;
 
         // Parse <series srsid="123">Show Name</series>
-        let series_re =
-            Regex::new(r#"<series\s+srsid="(\d+)"[^>]*>([^<]+)</series>"#).unwrap();
+        let series_re = Regex::new(r#"<series\s+srsid="(\d+)"[^>]*>([^<]+)</series>"#).unwrap();
 
         let show_id = series_re
             .captures_iter(&all_xml)

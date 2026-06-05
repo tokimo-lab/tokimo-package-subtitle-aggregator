@@ -37,8 +37,19 @@ impl AnimekalesiProvider {
 
     fn normalize_title(title: &str) -> String {
         let tr_chars = [
-            ('İ', 'i'), ('I', 'i'), ('Ğ', 'g'), ('Ü', 'u'), ('Ş', 's'), ('Ö', 'o'), ('Ç', 'c'),
-            ('ı', 'i'), ('ğ', 'g'), ('ü', 'u'), ('ş', 's'), ('ö', 'o'), ('ç', 'c'),
+            ('İ', 'i'),
+            ('I', 'i'),
+            ('Ğ', 'g'),
+            ('Ü', 'u'),
+            ('Ş', 's'),
+            ('Ö', 'o'),
+            ('Ç', 'c'),
+            ('ı', 'i'),
+            ('ğ', 'g'),
+            ('ü', 'u'),
+            ('ş', 's'),
+            ('ö', 'o'),
+            ('ç', 'c'),
         ];
         let mut s = title.to_lowercase();
         for (tr, en) in &tr_chars {
@@ -108,8 +119,8 @@ impl SubtitleProvider for AnimekalesiProvider {
             let document = Html::parse_document(&html);
             let td_sel = Selector::parse("td#bolumler")
                 .map_err(|e| format!("AnimeKalesi selector error: {e}"))?;
-            let a_sel = Selector::parse("a")
-                .map_err(|e| format!("AnimeKalesi selector error: {e}"))?;
+            let a_sel =
+                Selector::parse("a").map_err(|e| format!("AnimeKalesi selector error: {e}"))?;
 
             let normalized_query = Self::normalize_title(query.trim());
             let mut found: Option<(String, String)> = None;
@@ -177,11 +188,7 @@ impl SubtitleProvider for AnimekalesiProvider {
                     continue;
                 };
                 let href = link.value().attr("href").unwrap_or_default().to_string();
-                let title = link
-                    .value()
-                    .attr("title")
-                    .unwrap_or_default()
-                    .to_string();
+                let title = link.value().attr("title").unwrap_or_default().to_string();
                 if href.contains("indir_bolum-")
                     && title.contains("B\u{00f6}l\u{00fc}m T\u{00fc}rk\u{00e7}e Altyaz")
                 {
@@ -261,9 +268,7 @@ impl SubtitleProvider for AnimekalesiProvider {
                 .select(&dl_sel)
                 .next()
                 .and_then(|a| a.value().attr("href"))
-                .ok_or_else(|| {
-                    "AnimeKalesi: no download link found on episode page".to_string()
-                })?
+                .ok_or_else(|| "AnimeKalesi: no download link found on episode page".to_string())?
                 .to_string();
             if href.starts_with("http") {
                 href
@@ -289,6 +294,12 @@ impl SubtitleProvider for AnimekalesiProvider {
             .unwrap_or("subtitle.zip")
             .to_string();
 
-        extract_archive(&content, &archive_name, &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            &archive_name,
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

@@ -5,7 +5,9 @@ use scraper::{Html, Selector};
 
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
-use crate::models::{DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult};
+use crate::models::{
+    DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult,
+};
 
 const SERVER_URL: &str = "https://www.sous-titres.eu/";
 const SEARCH_URL: &str = "https://www.sous-titres.eu/search.html";
@@ -29,7 +31,9 @@ pub struct SoustitreseuProvider {
 
 impl SoustitreseuProvider {
     pub fn new(staging_root: impl Into<std::path::PathBuf>) -> Self {
-        Self { staging_root: staging_root.into() }
+        Self {
+            staging_root: staging_root.into(),
+        }
     }
 }
 
@@ -39,7 +43,10 @@ impl SubtitleProvider for SoustitreseuProvider {
         "soustitreseu"
     }
 
-    async fn search(&self, request: &SubtitleSearchRequest) -> Result<Vec<SubtitleSearchResult>, String> {
+    async fn search(
+        &self,
+        request: &SubtitleSearchRequest,
+    ) -> Result<Vec<SubtitleSearchResult>, String> {
         let query = request.query.clone().unwrap_or_default();
         if query.trim().is_empty() {
             return Err("soustitreseu: search requires a query".into());
@@ -58,7 +65,10 @@ impl SubtitleProvider for SoustitreseuProvider {
             return Err(format!("soustitreseu: HTTP {}", resp.status().as_u16()));
         }
 
-        let html = resp.text().await.map_err(|e| format!("soustitreseu: read response: {e}"))?;
+        let html = resp
+            .text()
+            .await
+            .map_err(|e| format!("soustitreseu: read response: {e}"))?;
         let document = Html::parse_document(&html);
 
         let mut results = Vec::new();
@@ -118,11 +128,18 @@ impl SubtitleProvider for SoustitreseuProvider {
             }
         }
 
-        tracing::info!("soustitreseu: found {} results for '{}'", results.len(), query);
+        tracing::info!(
+            "soustitreseu: found {} results for '{}'",
+            results.len(),
+            query
+        );
         Ok(results)
     }
 
-    async fn download(&self, request: &SubtitleDownloadRequest) -> Result<DownloadedSubtitle, String> {
+    async fn download(
+        &self,
+        request: &SubtitleDownloadRequest,
+    ) -> Result<DownloadedSubtitle, String> {
         // detail_path holds the series/movie page URL; download_path may hold direct zip URL
         let client = build_client()?;
 
@@ -130,12 +147,21 @@ impl SubtitleProvider for SoustitreseuProvider {
             dl.clone()
         } else if let Some(detail) = &request.detail_path {
             // Fetch detail page to find first .subList href
-            let resp = client.get(detail).send().await
+            let resp = client
+                .get(detail)
+                .send()
+                .await
                 .map_err(|e| format!("soustitreseu: fetch detail page: {e}"))?;
-            let html = resp.text().await.map_err(|e| format!("soustitreseu: read detail: {e}"))?;
+            let html = resp
+                .text()
+                .await
+                .map_err(|e| format!("soustitreseu: read detail: {e}"))?;
             let doc = Html::parse_document(&html);
-            let sub_sel = Selector::parse("a.subList").map_err(|_| "soustitreseu: selector error")?;
-            let first = doc.select(&sub_sel).next()
+            let sub_sel =
+                Selector::parse("a.subList").map_err(|_| "soustitreseu: selector error")?;
+            let first = doc
+                .select(&sub_sel)
+                .next()
                 .ok_or("soustitreseu: no subtitle archives found on detail page")?;
             let href = first.value().attr("href").unwrap_or("");
             // determine prefix: series vs films
@@ -148,13 +174,26 @@ impl SubtitleProvider for SoustitreseuProvider {
             return Err("soustitreseu: download requires detail_path or download_path".into());
         };
 
-        let resp = client.get(&zip_url).send().await
+        let resp = client
+            .get(&zip_url)
+            .send()
+            .await
             .map_err(|e| format!("soustitreseu: download archive: {e}"))?;
         if !resp.status().is_success() {
-            return Err(format!("soustitreseu: download HTTP {}", resp.status().as_u16()));
+            return Err(format!(
+                "soustitreseu: download HTTP {}",
+                resp.status().as_u16()
+            ));
         }
-        let bytes = resp.bytes().await.map_err(|e| format!("soustitreseu: read archive: {e}"))?;
-        let filename = zip_url.rsplit('/').next().unwrap_or("subtitle.zip").to_string();
+        let bytes = resp
+            .bytes()
+            .await
+            .map_err(|e| format!("soustitreseu: read archive: {e}"))?;
+        let filename = zip_url
+            .rsplit('/')
+            .next()
+            .unwrap_or("subtitle.zip")
+            .to_string();
         extract_archive(&bytes, &filename, &request.language, &self.staging_root).await
     }
 }

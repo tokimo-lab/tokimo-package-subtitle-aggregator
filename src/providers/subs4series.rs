@@ -7,8 +7,8 @@ use scraper::{Html, Selector};
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const SUBS4SERIES_BASE: &str = "https://www.subs4series.com";
@@ -59,9 +59,8 @@ impl SubtitleProvider for Subs4SeriesProvider {
             .as_deref()
             .ok_or("subs4series requires query")?;
 
-        let (season, episode) = parse_season_episode(query).ok_or(
-            "subs4series: query must contain season/episode pattern (e.g. S01E02)",
-        )?;
+        let (season, episode) = parse_season_episode(query)
+            .ok_or("subs4series: query must contain season/episode pattern (e.g. S01E02)")?;
 
         // Strip S##E## from query for show title search
         let title_re = Regex::new(r"\s*[Ss]\d+[Ee]\d+.*").unwrap();
@@ -105,7 +104,12 @@ impl SubtitleProvider for Subs4SeriesProvider {
                 .ok_or("subs4series: no show options found")?;
 
             // Extract show path parts: tv-series/show-name-123
-            let parts: Vec<&str> = link.trim_end_matches('/').split('/').rev().take(2).collect();
+            let parts: Vec<&str> = link
+                .trim_end_matches('/')
+                .split('/')
+                .rev()
+                .take(2)
+                .collect();
             let path = if parts.len() == 2 {
                 format!("{}/{}", parts[1], parts[0])
             } else {
@@ -115,9 +119,8 @@ impl SubtitleProvider for Subs4SeriesProvider {
         };
         let _ = show_link;
 
-        let episode_url = format!(
-            "{SUBS4SERIES_BASE}/{show_path}/season-{season}/episode-{episode}"
-        );
+        let episode_url =
+            format!("{SUBS4SERIES_BASE}/{show_path}/season-{season}/episode-{episode}");
 
         let ep_resp = client
             .get(&episode_url)
@@ -129,7 +132,10 @@ impl SubtitleProvider for Subs4SeriesProvider {
             return Ok(Vec::new());
         }
         if !ep_resp.status().is_success() {
-            return Err(format!("subs4series episode request failed: {}", ep_resp.status()));
+            return Err(format!(
+                "subs4series episode request failed: {}",
+                ep_resp.status()
+            ));
         }
 
         let ep_html = ep_resp
@@ -139,13 +145,10 @@ impl SubtitleProvider for Subs4SeriesProvider {
 
         let ep_doc = Html::parse_document(&ep_html);
 
-        let row_sel =
-            Selector::parse("table .seeDark, table .seeMedium")
-                .map_err(|e| format!("subs4series selector error: {e}"))?;
-        let b_sel =
-            Selector::parse("b").map_err(|e| format!("subs4series selector error: {e}"))?;
-        let a_sel =
-            Selector::parse("a").map_err(|e| format!("subs4series selector error: {e}"))?;
+        let row_sel = Selector::parse("table .seeDark, table .seeMedium")
+            .map_err(|e| format!("subs4series selector error: {e}"))?;
+        let b_sel = Selector::parse("b").map_err(|e| format!("subs4series selector error: {e}"))?;
+        let a_sel = Selector::parse("a").map_err(|e| format!("subs4series selector error: {e}"))?;
         let img_sel =
             Selector::parse("img").map_err(|e| format!("subs4series selector error: {e}"))?;
 
@@ -193,7 +196,10 @@ impl SubtitleProvider for Subs4SeriesProvider {
 
             let id = format!(
                 "subs4series-{}",
-                href.trim_end_matches('/').rsplit('/').next().unwrap_or(&version)
+                href.trim_end_matches('/')
+                    .rsplit('/')
+                    .next()
+                    .unwrap_or(&version)
             );
 
             results.push(SubtitleSearchResult {
@@ -279,6 +285,12 @@ impl SubtitleProvider for Subs4SeriesProvider {
             .await
             .map_err(|e| format!("subs4series read content error: {e}"))?;
 
-        extract_archive(&content, "subtitle.zip", &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            "subtitle.zip",
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

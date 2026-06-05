@@ -156,13 +156,13 @@ fn parse_subtitrarinoi_results(
         .map_err(|e| format!("SubtitrariNoi: selector error: {e}"))?;
     let title_sel = Selector::parse(r#"#content-main a"#)
         .map_err(|e| format!("SubtitrariNoi: selector error: {e}"))?;
-    let download_sel = Selector::parse(".buton a")
-        .map_err(|e| format!("SubtitrariNoi: selector error: {e}"))?;
+    let download_sel =
+        Selector::parse(".buton a").map_err(|e| format!("SubtitrariNoi: selector error: {e}"))?;
     let dl_count_sel = Selector::parse(r#"#content-right p"#)
         .map_err(|e| format!("SubtitrariNoi: selector error: {e}"))?;
 
-    let year_re =
-        regex::Regex::new(r"\((\d{4})\)").map_err(|e| format!("SubtitrariNoi: regex error: {e}"))?;
+    let year_re = regex::Regex::new(r"\((\d{4})\)")
+        .map_err(|e| format!("SubtitrariNoi: regex error: {e}"))?;
 
     let rows: Vec<_> = document.select(&round_sel).collect();
 
@@ -211,16 +211,11 @@ fn parse_subtitrarinoi_results(
             .and_then(|m| m.as_str().parse().ok());
 
         // Download count
-        let download_count: Option<u64> = row
-            .select(&dl_count_sel)
-            .next()
-            .and_then(|el| {
-                let text = el.text().collect::<String>();
-                // Text format: "Descarcari: 123"
-                text.split(':')
-                    .nth(1)
-                    .and_then(|n| n.trim().parse().ok())
-            });
+        let download_count: Option<u64> = row.select(&dl_count_sel).next().and_then(|el| {
+            let text = el.text().collect::<String>();
+            // Text format: "Descarcari: 123"
+            text.split(':').nth(1).and_then(|n| n.trim().parse().ok())
+        });
 
         let name = match year {
             Some(y) => format!("{title} ({y})"),

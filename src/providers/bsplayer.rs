@@ -38,9 +38,7 @@ impl BsPlayerProvider {
         params: &str,
     ) -> Result<String, String> {
         let envelope = Self::build_soap_envelope(BSPLAYER_API_URL, func_name, params);
-        let soap_action = format!(
-            "\"http://api.bsplayer-subtitles.com/v1.php#{func_name}\""
-        );
+        let soap_action = format!("\"http://api.bsplayer-subtitles.com/v1.php#{func_name}\"");
 
         let response = client
             .post(BSPLAYER_API_URL)
@@ -206,10 +204,9 @@ impl SubtitleProvider for BsPlayerProvider {
 
                 let sub_id = Self::extract_xml_text(item_xml, "subID")
                     .unwrap_or_else(|| format!("bsplayer-{index}"));
-                let download_link = Self::extract_xml_text(item_xml, "subDownloadLink")
-                    .unwrap_or_default();
-                let sub_lang = Self::extract_xml_text(item_xml, "subLang")
-                    .unwrap_or_default();
+                let download_link =
+                    Self::extract_xml_text(item_xml, "subDownloadLink").unwrap_or_default();
+                let sub_lang = Self::extract_xml_text(item_xml, "subLang").unwrap_or_default();
                 let sub_name = Self::extract_xml_text(item_xml, "subName")
                     .unwrap_or_else(|| format!("subtitle_{index}"));
                 let sub_format = Self::extract_xml_text(item_xml, "subFormat")

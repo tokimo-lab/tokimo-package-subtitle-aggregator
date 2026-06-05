@@ -5,7 +5,9 @@ use serde::Deserialize;
 
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
-use crate::models::{DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult};
+use crate::models::{
+    DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult,
+};
 
 const SERVER_URL: &str = "https://api.betaseries.com/";
 const UA: &str = "Sub-Zero/2";
@@ -58,7 +60,9 @@ pub struct BetaSeriesProvider {
 
 impl BetaSeriesProvider {
     pub fn new(staging_root: impl Into<std::path::PathBuf>) -> Self {
-        Self { staging_root: staging_root.into() }
+        Self {
+            staging_root: staging_root.into(),
+        }
     }
 }
 
@@ -68,7 +72,10 @@ impl SubtitleProvider for BetaSeriesProvider {
         "betaseries"
     }
 
-    async fn search(&self, request: &SubtitleSearchRequest) -> Result<Vec<SubtitleSearchResult>, String> {
+    async fn search(
+        &self,
+        request: &SubtitleSearchRequest,
+    ) -> Result<Vec<SubtitleSearchResult>, String> {
         let api_key = get_api_key()?;
         let client = build_client()?;
 
@@ -88,13 +95,16 @@ impl SubtitleProvider for BetaSeriesProvider {
         } else {
             let query = request.query.clone().unwrap_or_default();
             if query.trim().is_empty() {
-                return Err("betaseries: search requires either imdb_id (as tvdb_id) or query".into());
+                return Err(
+                    "betaseries: search requires either imdb_id (as tvdb_id) or query".into(),
+                );
             }
             endpoint = format!("{SERVER_URL}shows/episodes");
             params.push(("title", query));
         }
 
-        let resp = client.get(&endpoint)
+        let resp = client
+            .get(&endpoint)
             .query(&params)
             .send()
             .await
@@ -105,8 +115,12 @@ impl SubtitleProvider for BetaSeriesProvider {
             // Check for known error codes
             let body: serde_json::Value = resp.json().await.unwrap_or_default();
             if let Some(code) = body["errors"][0]["code"].as_u64() {
-                if code == 4001 { return Ok(vec![]); }
-                if code == 1001 { return Err("betaseries: invalid API key".into()); }
+                if code == 4001 {
+                    return Ok(vec![]);
+                }
+                if code == 1001 {
+                    return Err("betaseries: invalid API key".into());
+                }
             }
             return Ok(vec![]);
         }
@@ -114,7 +128,9 @@ impl SubtitleProvider for BetaSeriesProvider {
             return Err(format!("betaseries: HTTP {status}"));
         }
 
-        let result: BetaSeriesEpisodeResponse = resp.json().await
+        let result: BetaSeriesEpisodeResponse = resp
+            .json()
+            .await
             .map_err(|e| format!("betaseries: parse response: {e}"))?;
 
         if !result.errors.is_empty() {
@@ -122,20 +138,30 @@ impl SubtitleProvider for BetaSeriesProvider {
             return Ok(vec![]);
         }
 
-        let subs = result.episode
+        let subs = result
+            .episode
             .as_ref()
             .and_then(|ep| ep.subtitles.as_ref())
             .or_else(|| {
-                result.episodes.as_ref()
+                result
+                    .episodes
+                    .as_ref()
                     .and_then(|eps| eps.first())
                     .and_then(|ep| ep.subtitles.as_ref())
             });
 
-        let Some(subs) = subs else { return Ok(vec![]); };
+        let Some(subs) = subs else {
+            return Ok(vec![]);
+        };
 
         // Filter requested languages
-        let req_langs: Vec<&str> = request.languages.as_deref().unwrap_or(&[])
-            .iter().map(|s| s.as_str()).collect();
+        let req_langs: Vec<&str> = request
+            .languages
+            .as_deref()
+            .unwrap_or(&[])
+            .iter()
+            .map(|s| s.as_str())
+            .collect();
 
         let mut results = Vec::new();
         for sub in subs {
@@ -146,7 +172,9 @@ impl SubtitleProvider for BetaSeriesProvider {
                 }
             }
 
-            let Some((lang_code, lang_name)) = translate_lang(&sub.language) else { continue };
+            let Some((lang_code, lang_name)) = translate_lang(&sub.language) else {
+                continue;
+            };
             if !req_langs.is_empty() && !req_langs.contains(&lang_code) {
                 continue;
             }
@@ -156,7 +184,10 @@ impl SubtitleProvider for BetaSeriesProvider {
                 serde_json::Value::String(s) => s.clone(),
                 other => other.to_string(),
             };
-            let file_name = sub.file.clone().unwrap_or_else(|| format!("betaseries_{sub_id}.srt"));
+            let file_name = sub
+                .file
+                .clone()
+                .unwrap_or_else(|| format!("betaseries_{sub_id}.srt"));
             let url = sub.url.clone().unwrap_or_default();
 
             results.push(SubtitleSearchResult {
@@ -179,13 +210,21 @@ impl SubtitleProvider for BetaSeriesProvider {
         Ok(results)
     }
 
-    async fn download(&self, request: &SubtitleDownloadRequest) -> Result<DownloadedSubtitle, String> {
-        let url = request.download_path.as_deref()
+    async fn download(
+        &self,
+        request: &SubtitleDownloadRequest,
+    ) -> Result<DownloadedSubtitle, String> {
+        let url = request
+            .download_path
+            .as_deref()
             .or(request.detail_path.as_deref())
             .ok_or("betaseries: download requires download_path")?;
 
         let client = build_client()?;
-        let resp = client.get(url).send().await
+        let resp = client
+            .get(url)
+            .send()
+            .await
             .map_err(|e| format!("betaseries: download request: {e}"))?;
 
         let status = resp.status().as_u16();
@@ -196,7 +235,10 @@ impl SubtitleProvider for BetaSeriesProvider {
             return Err(format!("betaseries: download HTTP {status}"));
         }
 
-        let bytes = resp.bytes().await.map_err(|e| format!("betaseries: read bytes: {e}"))?;
+        let bytes = resp
+            .bytes()
+            .await
+            .map_err(|e| format!("betaseries: read bytes: {e}"))?;
         let filename = url.rsplit('/').next().unwrap_or("subtitle.srt").to_string();
 
         // Check if it's an archive

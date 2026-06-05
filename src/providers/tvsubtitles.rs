@@ -8,8 +8,8 @@ use zip::ZipArchive;
 
 use super::SubtitleProvider;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const BASE_URL: &str = "https://www.tvsubtitles.net/";
@@ -240,8 +240,7 @@ async fn get_episode_ids(
     for row in document.select(&row_sel) {
         let anchor = row
             .select(
-                &Selector::parse("a[href]")
-                    .map_err(|e| format!("anchor selector failed: {e}"))?,
+                &Selector::parse("a[href]").map_err(|e| format!("anchor selector failed: {e}"))?,
             )
             .find(|a| {
                 a.value()
@@ -268,15 +267,9 @@ async fn get_episode_ids(
         let cell_text: String = cells[0].text().collect();
         // Format: "1x01" or "S01E01"
         let episode_num: u32 = if let Some(pos) = cell_text.find('x') {
-            cell_text[pos + 1..]
-                .trim()
-                .parse()
-                .unwrap_or(0)
+            cell_text[pos + 1..].trim().parse().unwrap_or(0)
         } else if let Some(pos) = cell_text.to_ascii_lowercase().find('e') {
-            cell_text[pos + 1..]
-                .trim()
-                .parse()
-                .unwrap_or(0)
+            cell_text[pos + 1..].trim().parse().unwrap_or(0)
         } else {
             cell_text.trim().parse().unwrap_or(0)
         };
@@ -305,16 +298,14 @@ async fn get_episode_subtitles(
     let url = format!("{BASE_URL}episode-{episode_id}.html");
     let html = http_get(client, &url).await?;
     let document = Html::parse_document(&html);
-    let row_sel = Selector::parse(".subtitlen")
-        .map_err(|e| format!("subtitlen selector failed: {e}"))?;
+    let row_sel =
+        Selector::parse(".subtitlen").map_err(|e| format!("subtitlen selector failed: {e}"))?;
 
     let mut entries = Vec::new();
     for row in document.select(&row_sel) {
         // subtitle_id from parent anchor href: /subtitle-123.html
         let subtitle_id = {
-            let parent_html = row.parent().and_then(|p| {
-                scraper::ElementRef::wrap(p)
-            });
+            let parent_html = row.parent().and_then(|p| scraper::ElementRef::wrap(p));
             match parent_html {
                 Some(parent) => {
                     let href = parent.value().attr("href").unwrap_or("");
@@ -329,8 +320,7 @@ async fn get_episode_subtitles(
         };
 
         // Language from img src inside h5
-        let img_sel = Selector::parse("h5 img")
-            .map_err(|e| format!("img selector: {e}"))?;
+        let img_sel = Selector::parse("h5 img").map_err(|e| format!("img selector: {e}"))?;
         let lang_code = row
             .select(&img_sel)
             .next()
@@ -339,8 +329,8 @@ async fn get_episode_subtitles(
             .unwrap_or_else(|| "en".to_string());
 
         // Rip from <p title="rip">
-        let rip_sel = Selector::parse(r#"p[title="rip"]"#)
-            .map_err(|e| format!("rip selector: {e}"))?;
+        let rip_sel =
+            Selector::parse(r#"p[title="rip"]"#).map_err(|e| format!("rip selector: {e}"))?;
         let rip = row
             .select(&rip_sel)
             .next()
@@ -348,8 +338,7 @@ async fn get_episode_subtitles(
             .unwrap_or_default();
 
         // Release from first <h5>
-        let h5_sel =
-            Selector::parse("h5").map_err(|e| format!("h5 selector: {e}"))?;
+        let h5_sel = Selector::parse("h5").map_err(|e| format!("h5 selector: {e}"))?;
         let release = row
             .select(&h5_sel)
             .next()
@@ -377,8 +366,8 @@ async fn fetch_subtitle_file(
     let html = http_get(client, &download_page_url).await?;
 
     // Find JS parts: s1 = 'abc'; s2 = 'def'; …
-    let parts_re = Regex::new(r#"s\d\s*=\s*'([^']*)'"#)
-        .map_err(|e| format!("js parts regex: {e}"))?;
+    let parts_re =
+        Regex::new(r#"s\d\s*=\s*'([^']*)'"#).map_err(|e| format!("js parts regex: {e}"))?;
     let parts: Vec<&str> = parts_re
         .captures_iter(&html)
         .filter_map(|c| c.get(1).map(|m| m.as_str()))

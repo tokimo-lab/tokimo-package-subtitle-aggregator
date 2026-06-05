@@ -102,12 +102,11 @@ impl SubtitleProvider for SubsunacsProvider {
         let document = Html::parse_document(&html);
         let row_sel = Selector::parse("tr[onmouseover]")
             .map_err(|e| format!("SubsUnacs selector error: {e}"))?;
-        let td_movie_sel = Selector::parse("td.tdMovie")
-            .map_err(|e| format!("SubsUnacs selector error: {e}"))?;
-        let a_tooltip_sel = Selector::parse("a.tooltip")
-            .map_err(|e| format!("SubsUnacs selector error: {e}"))?;
-        let td_sel =
-            Selector::parse("td").map_err(|e| format!("SubsUnacs selector error: {e}"))?;
+        let td_movie_sel =
+            Selector::parse("td.tdMovie").map_err(|e| format!("SubsUnacs selector error: {e}"))?;
+        let a_tooltip_sel =
+            Selector::parse("a.tooltip").map_err(|e| format!("SubsUnacs selector error: {e}"))?;
+        let td_sel = Selector::parse("td").map_err(|e| format!("SubsUnacs selector error: {e}"))?;
 
         let mut results = Vec::new();
 
@@ -148,7 +147,14 @@ impl SubtitleProvider for SubsunacsProvider {
             let download_url = if link.starts_with("http") {
                 link.clone()
             } else {
-                format!("{SUBSUNACS_BASE_URL}{}", if link.starts_with('/') { link.clone() } else { format!("/{link}") })
+                format!(
+                    "{SUBSUNACS_BASE_URL}{}",
+                    if link.starts_with('/') {
+                        link.clone()
+                    } else {
+                        format!("/{link}")
+                    }
+                )
             };
 
             let release_group = fps
@@ -209,6 +215,12 @@ impl SubtitleProvider for SubsunacsProvider {
             .filter(|s| !s.is_empty())
             .unwrap_or("subtitle.zip");
 
-        extract_archive(&content, archive_name, &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            archive_name,
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

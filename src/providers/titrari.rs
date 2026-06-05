@@ -169,15 +169,13 @@ fn parse_titrari_results(html: &str, query: &str) -> Result<Vec<SubtitleSearchRe
     // Each subtitle is in a td[rowspan="5"] cell
     let row_sel = Selector::parse(r#"td[rowspan="5"]"#)
         .map_err(|e| format!("Titrari: selector parse error: {e}"))?;
-    let _title_sel = Selector::parse("h1 a")
-        .map_err(|e| format!("Titrari: selector parse error: {e}"))?;
-    let comment_sel = Selector::parse(".comment")
-        .map_err(|e| format!("Titrari: selector parse error: {e}"))?;
+    let _title_sel =
+        Selector::parse("h1 a").map_err(|e| format!("Titrari: selector parse error: {e}"))?;
+    let comment_sel =
+        Selector::parse(".comment").map_err(|e| format!("Titrari: selector parse error: {e}"))?;
 
-    let year_re =
-        Regex::new(r"\((\d{4})\)").map_err(|e| format!("Titrari: regex error: {e}"))?;
-    let imdb_re =
-        Regex::new(r"tt(\d+)").map_err(|e| format!("Titrari: regex error: {e}"))?;
+    let year_re = Regex::new(r"\((\d{4})\)").map_err(|e| format!("Titrari: regex error: {e}"))?;
+    let imdb_re = Regex::new(r"tt(\d+)").map_err(|e| format!("Titrari: regex error: {e}"))?;
 
     for (index, row) in document.select(&row_sel).enumerate() {
         // The first <a> in the row is the download link
@@ -196,13 +194,11 @@ fn parse_titrari_results(html: &str, query: &str) -> Result<Vec<SubtitleSearchRe
         };
 
         // Title and year from parent table's h1 a
-        let parent_html = row
-            .parent()
-            .and_then(|p| {
-                // Walk up to find the table row containing h1 a
-                // In practice, the h1 a is a sibling td's child
-                Some(p)
-            });
+        let parent_html = row.parent().and_then(|p| {
+            // Walk up to find the table row containing h1 a
+            // In practice, the h1 a is a sibling td's child
+            Some(p)
+        });
 
         // Try to get title from the document by looking at h1 a near this row
         // The Python code does: row.parent.select('h1 a')[0].text
@@ -243,9 +239,7 @@ fn parse_titrari_results(html: &str, query: &str) -> Result<Vec<SubtitleSearchRe
         // IMDB ID from page (try to find in the surrounding HTML)
         let imdb_id: Option<String> = {
             let all_text = row.html();
-            imdb_re
-                .captures(&all_text)
-                .map(|c| format!("tt{}", &c[1]))
+            imdb_re.captures(&all_text).map(|c| format!("tt{}", &c[1]))
         };
 
         let name = if year.is_some() {

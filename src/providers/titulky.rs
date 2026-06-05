@@ -84,9 +84,7 @@ impl TitulkyProvider {
                 .unwrap_or("");
 
             if location.contains("msg_type=e") {
-                return Err(
-                    "Titulky: login failed — check TITULKY_USER / TITULKY_PASS".into(),
-                );
+                return Err("Titulky: login failed — check TITULKY_USER / TITULKY_PASS".into());
             }
 
             if location.contains("omezen") {
@@ -119,10 +117,7 @@ impl TitulkyProvider {
     }
 
     /// Follow redirects manually (Titulky heavily uses meta-refresh / Location headers).
-    async fn fetch_following_redirects(
-        &self,
-        url: &str,
-    ) -> Result<String, String> {
+    async fn fetch_following_redirects(&self, url: &str) -> Result<String, String> {
         let mut current_url = url.to_string();
         let mut depth = 0usize;
 
@@ -148,7 +143,9 @@ impl TitulkyProvider {
                     .to_string();
 
                 if location.is_empty() {
-                    return Err(format!("Titulky: redirect with empty Location from {current_url}"));
+                    return Err(format!(
+                        "Titulky: redirect with empty Location from {current_url}"
+                    ));
                 }
 
                 // Check for error redirects
@@ -322,14 +319,12 @@ fn parse_titulky_results(
     let mut results = Vec::new();
 
     // Container with subtitle rows
-    let form_sel = Selector::parse("form.cloudForm")
-        .map_err(|e| format!("Titulky: selector error: {e}"))?;
+    let form_sel =
+        Selector::parse("form.cloudForm").map_err(|e| format!("Titulky: selector error: {e}"))?;
     let row_sel =
         Selector::parse("div.row").map_err(|e| format!("Titulky: selector error: {e}"))?;
-    let h5_sel =
-        Selector::parse("h5").map_err(|e| format!("Titulky: selector error: {e}"))?;
-    let anchor_sel =
-        Selector::parse("a").map_err(|e| format!("Titulky: selector error: {e}"))?;
+    let h5_sel = Selector::parse("h5").map_err(|e| format!("Titulky: selector error: {e}"))?;
+    let anchor_sel = Selector::parse("a").map_err(|e| format!("Titulky: selector error: {e}"))?;
 
     let id_re = Regex::new(r"id=(\d+)").map_err(|e| format!("Titulky: regex error: {e}"))?;
 

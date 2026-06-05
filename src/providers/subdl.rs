@@ -226,8 +226,8 @@ impl SubtitleProvider for SubdlProvider {
             .map_err(|e| format!("解析 SubDL 搜索结果失败: {e}"))?;
 
         // Check for API-level errors
-        let api_ok = search_response.status.unwrap_or(true)
-            && search_response.success.unwrap_or(true);
+        let api_ok =
+            search_response.status.unwrap_or(true) && search_response.success.unwrap_or(true);
         if !api_ok {
             if let Some(error_msg) = &search_response.error {
                 let lower = error_msg.to_ascii_lowercase();
@@ -239,12 +239,7 @@ impl SubtitleProvider for SubdlProvider {
                 if has_imdb && has_tmdb {
                     tracing::debug!("SubDL: IMDB 搜索失败，尝试 TMDB fallback");
                     return self
-                        .search_by_tmdb(
-                            &client,
-                            &url,
-                            &params,
-                            request.tmdb_id.as_deref().unwrap(),
-                        )
+                        .search_by_tmdb(&client, &url, &params, request.tmdb_id.as_deref().unwrap())
                         .await;
                 }
                 return Err(format!("SubDL API 错误: {error_msg}"));
@@ -347,7 +342,13 @@ impl SubtitleProvider for SubdlProvider {
             .filter(|s| !s.is_empty())
             .unwrap_or("subtitle.zip");
 
-        extract_archive(&content, archive_name, &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            archive_name,
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }
 
@@ -382,8 +383,8 @@ impl SubdlProvider {
             .await
             .map_err(|e| format!("解析 SubDL TMDB fallback 结果失败: {e}"))?;
 
-        let api_ok = search_response.status.unwrap_or(true)
-            && search_response.success.unwrap_or(true);
+        let api_ok =
+            search_response.status.unwrap_or(true) && search_response.success.unwrap_or(true);
         if !api_ok {
             return Ok(vec![]);
         }

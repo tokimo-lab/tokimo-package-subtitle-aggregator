@@ -94,20 +94,15 @@ impl SubtitleProvider for TheSubDbProvider {
                 }
                 // map thesubdb lang → our lang and check
                 let our_lang = thesubdb_to_lang(lang);
-                preferred.iter().any(|p| {
-                    p == &our_lang
-                        || (p.starts_with("zh") && our_lang.starts_with("zh"))
-                })
+                preferred
+                    .iter()
+                    .any(|p| p == &our_lang || (p.starts_with("zh") && our_lang.starts_with("zh")))
             })
             .map(|lang| {
                 let our_lang = thesubdb_to_lang(lang);
                 SubtitleSearchResult {
                     id: format!("thesubdb_{hash}_{lang}"),
-                    name: format!(
-                        "{}.{lang}.srt",
-                        query_title
-                            .replace(['/', '\\', ':'], "_")
-                    ),
+                    name: format!("{}.{lang}.srt", query_title.replace(['/', '\\', ':'], "_")),
                     language: our_lang.clone(),
                     language_name: lang_display_name(&our_lang),
                     format: "srt".into(),
@@ -135,7 +130,9 @@ impl SubtitleProvider for TheSubDbProvider {
             .as_deref()
             .ok_or("TheSubDB 下载缺少 download_path")?;
 
-        let (hash, lang) = dl_path.split_once('|').ok_or("TheSubDB download_path 格式错误")?;
+        let (hash, lang) = dl_path
+            .split_once('|')
+            .ok_or("TheSubDB download_path 格式错误")?;
 
         let client = Self::build_client()?;
         let url = format!("{THESUBDB_API}?action=download&hash={hash}&language={lang}");

@@ -125,10 +125,7 @@ impl SubtitleProvider for RegieLiveProvider {
 
         if let Some(rezultate) = data.get("rezultate").and_then(|r| r.as_object()) {
             for (_film_key, film_val) in rezultate {
-                if let Some(subtitrari) = film_val
-                    .get("subtitrari")
-                    .and_then(|s| s.as_object())
-                {
+                if let Some(subtitrari) = film_val.get("subtitrari").and_then(|s| s.as_object()) {
                     for (_sub_key, sub_val) in subtitrari {
                         let titlu = sub_val
                             .get("titlu")
@@ -165,11 +162,7 @@ impl SubtitleProvider for RegieLiveProvider {
                             download_count: None,
                             rating,
                             movie_name: Some(query.clone()),
-                            release_group: if titlu.is_empty() {
-                                None
-                            } else {
-                                Some(titlu)
-                            },
+                            release_group: if titlu.is_empty() { None } else { Some(titlu) },
                         });
                         idx += 1;
                     }
@@ -195,7 +188,10 @@ impl SubtitleProvider for RegieLiveProvider {
         // First fetch the site to get cookies
         client
             .get(SITE_URL)
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+            .header(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            )
             .header("Accept-Language", "en-US,en;q=0.5")
             .send()
             .await
@@ -205,7 +201,10 @@ impl SubtitleProvider for RegieLiveProvider {
             .get(sub_url)
             .header("Referer", SITE_URL)
             .header("Origin", SITE_URL)
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+            .header(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            )
             .header("Accept-Language", "en-US,en;q=0.5")
             .send()
             .await

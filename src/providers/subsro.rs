@@ -158,16 +158,14 @@ fn parse_subsro_results(
     // Each subtitle result is in div.md:col-span-6
     let item_sel = Selector::parse("div.md\\:col-span-6")
         .map_err(|e| format!("SubsRo: selector error: {e}"))?;
-    let img_sel =
-        Selector::parse("img").map_err(|e| format!("SubsRo: selector error: {e}"))?;
-    let h1_sel = Selector::parse("h1 a")
-        .map_err(|e| format!("SubsRo: selector error: {e}"))?;
-    let dl_link_sel = Selector::parse("div a")
-        .map_err(|e| format!("SubsRo: selector error: {e}"))?;
+    let img_sel = Selector::parse("img").map_err(|e| format!("SubsRo: selector error: {e}"))?;
+    let h1_sel = Selector::parse("h1 a").map_err(|e| format!("SubsRo: selector error: {e}"))?;
+    let dl_link_sel =
+        Selector::parse("div a").map_err(|e| format!("SubsRo: selector error: {e}"))?;
 
     let year_re = Regex::new(r"\((\d{4})\)").map_err(|e| format!("SubsRo: regex error: {e}"))?;
-    let season_re = Regex::new(r"Sezonul\s*(\d+)")
-        .map_err(|e| format!("SubsRo: regex error: {e}"))?;
+    let season_re =
+        Regex::new(r"Sezonul\s*(\d+)").map_err(|e| format!("SubsRo: regex error: {e}"))?;
 
     for (index, item) in document.select(&item_sel).enumerate() {
         // Determine language from flag image
@@ -227,13 +225,7 @@ fn parse_subsro_results(
         // Strip season suffix and year: "Title - Sezonul 2 (2021)" → "Title"
         let title = Regex::new(r"\s*(-\s*Sezonul\s*\d+)?\s*\(\d{4}\).*$")
             .ok()
-            .and_then(|re| {
-                Some(
-                    re.replace(&title_raw, "")
-                        .trim()
-                        .to_string(),
-                )
-            })
+            .and_then(|re| Some(re.replace(&title_raw, "").trim().to_string()))
             .unwrap_or_else(|| title_raw.clone());
 
         let year: Option<u64> = year_re
@@ -243,9 +235,7 @@ fn parse_subsro_results(
 
         // Release info from p span with blue color
         let release_info = item
-            .select(
-                &Selector::parse("p span").unwrap_or_else(|_| Selector::parse("p").unwrap()),
-            )
+            .select(&Selector::parse("p span").unwrap_or_else(|_| Selector::parse("p").unwrap()))
             .find(|el| {
                 el.value()
                     .attr("style")
@@ -276,7 +266,9 @@ fn parse_subsro_results(
             download_count: None,
             rating: None,
             movie_name: Some(title),
-            release_group: release_info.map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
+            release_group: release_info
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty()),
         });
         let _ = imdb_id;
         let _ = season_re;

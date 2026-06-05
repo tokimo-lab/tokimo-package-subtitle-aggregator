@@ -171,8 +171,8 @@ impl SubtitriIdProvider {
 
         let header_sel = Selector::parse(".main-header")
             .map_err(|e| format!("subtitriid: selector error: {e}"))?;
-        let dl_sel = Selector::parse(".hvr")
-            .map_err(|e| format!("subtitriid: selector error: {e}"))?;
+        let dl_sel =
+            Selector::parse(".hvr").map_err(|e| format!("subtitriid: selector error: {e}"))?;
 
         // Extract title
         let title = document
@@ -181,11 +181,7 @@ impl SubtitriIdProvider {
             .map(|el| {
                 let text = el.text().collect::<String>();
                 // Take last part after ' / '
-                text.split(" / ")
-                    .last()
-                    .unwrap_or(&text)
-                    .trim()
-                    .to_string()
+                text.split(" / ").last().unwrap_or(&text).trim().to_string()
             })
             .filter(|s| !s.is_empty())
             .unwrap_or_else(|| fallback_title.to_string());

@@ -71,12 +71,10 @@ impl SubtitleProvider for YavkanetProvider {
             .map_err(|e| format!("Failed to read YavkaNet response: {e}"))?;
 
         let document = Html::parse_document(&html);
-        let row_sel = Selector::parse("tr")
-            .map_err(|e| format!("YavkaNet selector error: {e}"))?;
+        let row_sel = Selector::parse("tr").map_err(|e| format!("YavkaNet selector error: {e}"))?;
         let a_balon_sel = Selector::parse("a.balon, a.selector")
             .map_err(|e| format!("YavkaNet selector error: {e}"))?;
-        let td_sel =
-            Selector::parse("td").map_err(|e| format!("YavkaNet selector error: {e}"))?;
+        let td_sel = Selector::parse("td").map_err(|e| format!("YavkaNet selector error: {e}"))?;
         let _span_sel = Selector::parse("span.smGray, span")
             .map_err(|e| format!("YavkaNet selector error: {e}"))?;
 
@@ -179,6 +177,12 @@ impl SubtitleProvider for YavkanetProvider {
             .filter(|s| !s.is_empty())
             .unwrap_or("subtitle.zip");
 
-        extract_archive(&content, archive_name, &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            archive_name,
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

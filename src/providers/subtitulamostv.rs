@@ -117,8 +117,8 @@ impl SubtitleProvider for SubtitulamosTvProvider {
                 .map_err(|e| format!("SubtitulamosTV selector error: {e}"))?;
             let dl_sel = Selector::parse("a[href*='/download']")
                 .map_err(|e| format!("SubtitulamosTV selector error: {e}"))?;
-            let p_sel = Selector::parse("p")
-                .map_err(|e| format!("SubtitulamosTV selector error: {e}"))?;
+            let p_sel =
+                Selector::parse("p").map_err(|e| format!("SubtitulamosTV selector error: {e}"))?;
 
             for lang_container in document.select(&lang_sel) {
                 let lang_name = lang_container
@@ -135,7 +135,11 @@ impl SubtitleProvider for SubtitulamosTvProvider {
                     continue;
                 };
 
-                let language_name = if language == "en" { "English" } else { "Español" };
+                let language_name = if language == "en" {
+                    "English"
+                } else {
+                    "Español"
+                };
 
                 for version in lang_container.select(&version_sel) {
                     let dl_links: Vec<_> = version.select(&dl_sel).collect();

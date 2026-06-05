@@ -22,10 +22,7 @@ impl SubtisProvider {
             .map_err(|e| format!("Failed to build Subtis HTTP client: {e}"))
     }
 
-    async fn fetch_subtitle(
-        client: &reqwest::Client,
-        url: &str,
-    ) -> Option<(String, String)> {
+    async fn fetch_subtitle(client: &reqwest::Client, url: &str) -> Option<(String, String)> {
         let response = client.get(url).send().await.ok()?;
         if !response.status().is_success() {
             return None;
@@ -78,8 +75,8 @@ impl SubtitleProvider for SubtisProvider {
         }
         if let Some(query) = &request.query {
             if !query.trim().is_empty() {
-                let encoded =
-                    url::form_urlencoded::byte_serialize(query.trim().as_bytes()).collect::<String>();
+                let encoded = url::form_urlencoded::byte_serialize(query.trim().as_bytes())
+                    .collect::<String>();
                 cascade.push((
                     format!("{SUBTIS_API_BASE}/subtitle/find/file/name/{encoded}"),
                     "name",

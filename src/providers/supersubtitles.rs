@@ -78,7 +78,8 @@ impl SubtitleProvider for SuperSubtitlesProvider {
 
         if season > 0 {
             // Series search
-            self.search_series(&client, &series_name, season, episode).await
+            self.search_series(&client, &series_name, season, episode)
+                .await
         } else {
             // Movie search
             self.search_movie(&client, query).await
@@ -205,11 +206,7 @@ impl SuperSubtitlesProvider {
                 let (lang_code, lang_name) = language_code(lang_str);
                 let nev = item.nev.clone().unwrap_or_default();
                 let fnev = item.fnev.clone().unwrap_or_else(|| nev.clone());
-                let felirat = item
-                    .felirat
-                    .as_ref()
-                    .map(val_to_string)
-                    .unwrap_or_default();
+                let felirat = item.felirat.as_ref().map(val_to_string).unwrap_or_default();
                 let ep = item.ep.as_ref().map(val_to_string).unwrap_or_default();
                 let evad = item.evad.as_ref().map(val_to_string).unwrap_or_default();
 
@@ -276,7 +273,10 @@ impl SuperSubtitlesProvider {
 
         // For movies, just return a basic result pointing at the search page
         // A more complete implementation would parse the HTML
-        let _html = response.text().await.map_err(|e| format!("supersubtitles: failed to read HTML: {e}"))?;
+        let _html = response
+            .text()
+            .await
+            .map_err(|e| format!("supersubtitles: failed to read HTML: {e}"))?;
 
         // Return empty — movie HTML parsing would require scraper but is complex
         Ok(vec![])
@@ -291,8 +291,13 @@ fn parse_series_query(query: &str) -> (String, u32, u32) {
         let after = &upper[s_pos + 2..];
         if let Some(e_pos) = after.find('E') {
             let season_str = &after[..e_pos];
-            let episode_str: String = after[e_pos + 1..].chars().take_while(|c| c.is_ascii_digit()).collect();
-            if let (Ok(season), Ok(episode)) = (season_str.parse::<u32>(), episode_str.parse::<u32>()) {
+            let episode_str: String = after[e_pos + 1..]
+                .chars()
+                .take_while(|c| c.is_ascii_digit())
+                .collect();
+            if let (Ok(season), Ok(episode)) =
+                (season_str.parse::<u32>(), episode_str.parse::<u32>())
+            {
                 let series = query[..s_pos].trim().to_string();
                 return (series, season, episode);
             }

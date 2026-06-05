@@ -270,7 +270,5 @@ fn extract_zimuku_download_url(html: &str, detail_url: &str) -> Result<String, S
         }
     }
 
-    Err(format!(
-        "未能从字幕库详情页提取下载地址: {detail_url}"
-    ))
+    Err(format!("未能从字幕库详情页提取下载地址: {detail_url}"))
 }

@@ -431,9 +431,7 @@ impl SubtitleProvider for SubSourceProvider {
             return Err("SubSource 搜索需要提供 query 或 imdb_id".into());
         }
 
-        let movie_id = self
-            .search_movie_id(&client, title, imdb_id)
-            .await?;
+        let movie_id = self.search_movie_id(&client, title, imdb_id).await?;
 
         let Some(movie_id) = movie_id else {
             tracing::debug!("SubSource: 未找到匹配的影片");
@@ -530,9 +528,7 @@ impl SubtitleProvider for SubSourceProvider {
 
                 let format = normalize_format(&name).unwrap_or_else(|| "srt".into());
 
-                let download_path = format!(
-                    "{SUBSOURCE_API_BASE}subtitles/{subtitle_id}/download"
-                );
+                let download_path = format!("{SUBSOURCE_API_BASE}subtitles/{subtitle_id}/download");
 
                 all_results.push(SubtitleSearchResult {
                     id: subtitle_id,
@@ -604,6 +600,12 @@ impl SubtitleProvider for SubSourceProvider {
             format!("{archive_name}.zip")
         };
 
-        extract_archive(&content, &archive_name, &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            &archive_name,
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

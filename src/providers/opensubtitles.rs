@@ -198,32 +198,25 @@ impl SubtitleProvider for OpenSubtitlesProvider {
                     .file_name
                     .clone()
                     .unwrap_or_else(|| format!("subtitle_{}", file.file_id));
-                let format = crate::models::normalize_format(&file_name)
-                    .unwrap_or_else(|| "srt".into());
+                let format =
+                    crate::models::normalize_format(&file_name).unwrap_or_else(|| "srt".into());
                 let language = from_os_language(&sub.attributes.language);
                 let language_name = from_os_language_name(&sub.attributes.language);
-                let movie_name = sub
-                    .attributes
-                    .feature_details
-                    .as_ref()
-                    .and_then(|fd| {
-                        fd.movie_name
-                            .clone()
-                            .or_else(|| fd.title.clone())
-                            .map(|name| {
-                                if let Some(year) = fd.year {
-                                    format!("{name} ({year})")
-                                } else {
-                                    name
-                                }
-                            })
-                    });
+                let movie_name = sub.attributes.feature_details.as_ref().and_then(|fd| {
+                    fd.movie_name
+                        .clone()
+                        .or_else(|| fd.title.clone())
+                        .map(|name| {
+                            if let Some(year) = fd.year {
+                                format!("{name} ({year})")
+                            } else {
+                                name
+                            }
+                        })
+                });
 
                 Some(SubtitleSearchResult {
-                    id: sub
-                        .attributes
-                        .subtitle_id
-                        .unwrap_or_else(|| sub.id.clone()),
+                    id: sub.attributes.subtitle_id.unwrap_or_else(|| sub.id.clone()),
                     name: file_name,
                     language,
                     language_name,

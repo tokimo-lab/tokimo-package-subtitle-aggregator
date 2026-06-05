@@ -7,8 +7,8 @@ use scraper::{Html, Selector};
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const SUBSCENTER_BASE: &str = "http://www.subscenter.info/he/";
@@ -90,9 +90,8 @@ impl SubtitleProvider for SubsCenterProvider {
                 .map_err(|e| format!("subscenter read error: {e}"))?;
 
             let document = Html::parse_document(&html);
-            let link_sel =
-                Selector::parse("#processes div.generalWindowTop a")
-                    .map_err(|e| format!("subscenter selector error: {e}"))?;
+            let link_sel = Selector::parse("#processes div.generalWindowTop a")
+                .map_err(|e| format!("subscenter selector error: {e}"))?;
 
             let href = document
                 .select(&link_sel)
@@ -109,9 +108,7 @@ impl SubtitleProvider for SubsCenterProvider {
 
         let data_url = if is_series {
             let (season, episode) = se_opt.unwrap_or((1, 1));
-            format!(
-                "{SUBSCENTER_BASE}cst/data/series/sb/{url_title}/{season}/{episode}/"
-            )
+            format!("{SUBSCENTER_BASE}cst/data/series/sb/{url_title}/{season}/{episode}/")
         } else {
             format!("{SUBSCENTER_BASE}cst/data/movie/sb/{url_title}/")
         };
@@ -130,7 +127,10 @@ impl SubtitleProvider for SubsCenterProvider {
             .map_err(|e| format!("subscenter data request failed: {e}"))?;
 
         if !data_resp.status().is_success() {
-            return Err(format!("subscenter data request failed: {}", data_resp.status()));
+            return Err(format!(
+                "subscenter data request failed: {}",
+                data_resp.status()
+            ));
         }
 
         let json_text = data_resp
@@ -160,23 +160,19 @@ impl SubtitleProvider for SubsCenterProvider {
                                             .as_u64()
                                             .map(|v| v.to_string())
                                             .unwrap_or_default();
-                                        let key = sub_info["key"]
-                                            .as_str()
-                                            .unwrap_or("")
-                                            .to_string();
+                                        let key =
+                                            sub_info["key"].as_str().unwrap_or("").to_string();
                                         let subtitle_version = sub_info["subtitle_version"]
                                             .as_str()
                                             .unwrap_or("")
                                             .to_string();
-                                        let downloaded = sub_info["downloaded"]
-                                            .as_u64();
+                                        let downloaded = sub_info["downloaded"].as_u64();
 
                                         if id.is_empty() {
                                             continue;
                                         }
 
-                                        let composite_id =
-                                            format!("{id}:{key}:{subtitle_version}");
+                                        let composite_id = format!("{id}:{key}:{subtitle_version}");
 
                                         results.push(SubtitleSearchResult {
                                             id: composite_id,
@@ -245,7 +241,13 @@ impl SubtitleProvider for SubsCenterProvider {
             .await
             .map_err(|e| format!("subscenter read content error: {e}"))?;
 
-        extract_archive(&content, "subtitle.zip", &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            "subtitle.zip",
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }
 
@@ -267,6 +269,8 @@ fn parse_kind_and_title(path: &str) -> Result<(String, String), String> {
         let title = parts[parts.len() - 1].to_string();
         Ok((kind, title))
     } else {
-        Err(format!("subscenter: cannot parse kind/title from path: {path}"))
+        Err(format!(
+            "subscenter: cannot parse kind/title from path: {path}"
+        ))
     }
 }

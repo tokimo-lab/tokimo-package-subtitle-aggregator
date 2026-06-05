@@ -85,8 +85,8 @@ impl SubtitleProvider for AnimesubinfoProvider {
         // Each subtitle is in a table with class "Napisy" that has rows with class "KNap"
         let table_sel = Selector::parse("table.Napisy")
             .map_err(|e| format!("AnimeSubInfo selector error: {e}"))?;
-        let row_sel = Selector::parse("tr.KNap")
-            .map_err(|e| format!("AnimeSubInfo selector error: {e}"))?;
+        let row_sel =
+            Selector::parse("tr.KNap").map_err(|e| format!("AnimeSubInfo selector error: {e}"))?;
         let td_sel =
             Selector::parse("td").map_err(|e| format!("AnimeSubInfo selector error: {e}"))?;
         let a_sel =
@@ -143,13 +143,7 @@ impl SubtitleProvider for AnimesubinfoProvider {
             // Download count
             let download_count = row2_tds
                 .get(3)
-                .and_then(|td| {
-                    td.text()
-                        .collect::<String>()
-                        .trim()
-                        .parse::<u64>()
-                        .ok()
-                });
+                .and_then(|td| td.text().collect::<String>().trim().parse::<u64>().ok());
 
             let name = if !title_eng.is_empty() {
                 format!("{title_org} / {title_eng}")
@@ -226,7 +220,14 @@ impl SubtitleProvider for AnimesubinfoProvider {
             .unwrap_or("subtitle.zip");
 
         // Try archive extraction; if it fails, return as raw content
-        match extract_archive(&content, archive_name, &request.language, &self.staging_root).await {
+        match extract_archive(
+            &content,
+            archive_name,
+            &request.language,
+            &self.staging_root,
+        )
+        .await
+        {
             Ok(sub) => Ok(sub),
             Err(_) => {
                 let format = request.format.clone();

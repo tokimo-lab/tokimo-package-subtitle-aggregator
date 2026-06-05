@@ -36,11 +36,7 @@ impl TurkcealtyaziProvider {
     }
 
     fn text_content(element: scraper::ElementRef<'_>) -> String {
-        element
-            .text()
-            .collect::<String>()
-            .trim()
-            .to_string()
+        element.text().collect::<String>().trim().to_string()
     }
 
     fn map_language_class(class: &str) -> &'static str {
@@ -266,6 +262,12 @@ impl SubtitleProvider for TurkcealtyaziProvider {
             .await
             .map_err(|e| format!("Failed to read TurkceAltyazi download: {e}"))?;
 
-        extract_archive(&content, "subtitle.zip", &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            "subtitle.zip",
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

@@ -6,8 +6,8 @@ use tokio::sync::Mutex;
 
 use super::SubtitleProvider;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const BASE: &str = "https://www.addic7ed.com";
@@ -79,7 +79,9 @@ impl Addic7edProvider {
         let body = response.text().await.unwrap_or_default();
 
         if body.contains("Wrong password") || body.contains("doesn't exist") {
-            return Err(format!("Addic7ed: wrong username or password for '{username}'"));
+            return Err(format!(
+                "Addic7ed: wrong username or password for '{username}'"
+            ));
         }
 
         if body.contains("relax, slow down") {
@@ -259,12 +261,12 @@ fn parse_episode_rows(
     languages: Option<&[String]>,
 ) -> Result<Vec<SubtitleSearchResult>, String> {
     let document = Html::parse_document(html);
-    let row_sel = Selector::parse("tr.epeven")
-        .map_err(|e| format!("Addic7ed row selector error: {e}"))?;
-    let cell_sel = Selector::parse("td")
-        .map_err(|e| format!("Addic7ed cell selector error: {e}"))?;
-    let link_sel = Selector::parse("a[href]")
-        .map_err(|e| format!("Addic7ed link selector error: {e}"))?;
+    let row_sel =
+        Selector::parse("tr.epeven").map_err(|e| format!("Addic7ed row selector error: {e}"))?;
+    let cell_sel =
+        Selector::parse("td").map_err(|e| format!("Addic7ed cell selector error: {e}"))?;
+    let link_sel =
+        Selector::parse("a[href]").map_err(|e| format!("Addic7ed link selector error: {e}"))?;
 
     let mut results = Vec::new();
 
@@ -357,10 +359,9 @@ fn parse_movie_rows(
     // Tables with class "tabel95" and width="100%"
     let table_sel = Selector::parse(r#"table[class="tabel95"]"#)
         .map_err(|e| format!("Addic7ed table selector error: {e}"))?;
-    let link_sel = Selector::parse("a[href]")
-        .map_err(|e| format!("Addic7ed link selector error: {e}"))?;
-    let td_sel =
-        Selector::parse("td").map_err(|e| format!("Addic7ed td selector error: {e}"))?;
+    let link_sel =
+        Selector::parse("a[href]").map_err(|e| format!("Addic7ed link selector error: {e}"))?;
+    let td_sel = Selector::parse("td").map_err(|e| format!("Addic7ed td selector error: {e}"))?;
 
     let mut results = Vec::new();
     let page_link = format!("{BASE}/movie/{movie_id}");
@@ -634,22 +635,14 @@ impl SubtitleProvider for Addic7edProvider {
             self.ensure_logged_in().await?;
         }
 
-        let download_url = if download_path.starts_with("http://")
-            || download_path.starts_with("https://")
-        {
-            download_path.to_string()
-        } else {
-            format!(
-                "{BASE}/{}",
-                download_path.trim_start_matches('/')
-            )
-        };
+        let download_url =
+            if download_path.starts_with("http://") || download_path.starts_with("https://") {
+                download_path.to_string()
+            } else {
+                format!("{BASE}/{}", download_path.trim_start_matches('/'))
+            };
 
-        let referer = request
-            .detail_path
-            .as_deref()
-            .unwrap_or(BASE)
-            .to_string();
+        let referer = request.detail_path.as_deref().unwrap_or(BASE).to_string();
 
         let response = self
             .client
@@ -678,11 +671,8 @@ impl SubtitleProvider for Addic7edProvider {
         }
 
         // Try to get filename from Content-Disposition
-        let disposition_name = filename_from_disposition(
-            response
-                .headers()
-                .get(reqwest::header::CONTENT_DISPOSITION),
-        );
+        let disposition_name =
+            filename_from_disposition(response.headers().get(reqwest::header::CONTENT_DISPOSITION));
 
         let content = response
             .bytes()

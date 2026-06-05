@@ -94,14 +94,12 @@ impl SubtitleProvider for SubssabbzProvider {
             .map_err(|e| format!("Failed to read SubsSabBz response: {e}"))?;
 
         let document = Html::parse_document(&html);
-        let row_sel = Selector::parse("tr.subs-row")
-            .map_err(|e| format!("SubsSabBz selector error: {e}"))?;
-        let td_c2_sel = Selector::parse("td.c2field")
-            .map_err(|e| format!("SubsSabBz selector error: {e}"))?;
-        let a_sel =
-            Selector::parse("a").map_err(|e| format!("SubsSabBz selector error: {e}"))?;
-        let td_sel =
-            Selector::parse("td").map_err(|e| format!("SubsSabBz selector error: {e}"))?;
+        let row_sel =
+            Selector::parse("tr.subs-row").map_err(|e| format!("SubsSabBz selector error: {e}"))?;
+        let td_c2_sel =
+            Selector::parse("td.c2field").map_err(|e| format!("SubsSabBz selector error: {e}"))?;
+        let a_sel = Selector::parse("a").map_err(|e| format!("SubsSabBz selector error: {e}"))?;
+        let td_sel = Selector::parse("td").map_err(|e| format!("SubsSabBz selector error: {e}"))?;
 
         let mut results = Vec::new();
 
@@ -133,7 +131,14 @@ impl SubtitleProvider for SubssabbzProvider {
             let download_url = if link.starts_with("http") {
                 link.clone()
             } else {
-                format!("{SUBSSABBZ_BASE_URL}{}", if link.starts_with('/') { link.clone() } else { format!("/{link}") })
+                format!(
+                    "{SUBSSABBZ_BASE_URL}{}",
+                    if link.starts_with('/') {
+                        link.clone()
+                    } else {
+                        format!("/{link}")
+                    }
+                )
             };
 
             let release_group = fps.map(|f| format!("{f:.3} fps")).or(uploader);
@@ -192,6 +197,12 @@ impl SubtitleProvider for SubssabbzProvider {
             .filter(|s| !s.is_empty())
             .unwrap_or("subtitle.zip");
 
-        extract_archive(&content, archive_name, &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            archive_name,
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

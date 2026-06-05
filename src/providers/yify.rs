@@ -7,8 +7,8 @@ use scraper::{Html, Selector};
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const YIFY_BASE_URL: &str = "https://yifysubtitles.ch";
@@ -132,10 +132,9 @@ fn parse_movie_page(
 ) -> Result<Vec<SubtitleSearchResult>, String> {
     let document = Html::parse_document(html);
 
-    let table_sel = Selector::parse("table.other-subs")
-        .map_err(|e| format!("YIFY selector error: {e}"))?;
-    let tbody_sel =
-        Selector::parse("tbody").map_err(|e| format!("YIFY selector error: {e}"))?;
+    let table_sel =
+        Selector::parse("table.other-subs").map_err(|e| format!("YIFY selector error: {e}"))?;
+    let tbody_sel = Selector::parse("tbody").map_err(|e| format!("YIFY selector error: {e}"))?;
     let tr_sel = Selector::parse("tr").map_err(|e| format!("YIFY selector error: {e}"))?;
     let td_sel = Selector::parse("td").map_err(|e| format!("YIFY selector error: {e}"))?;
     let a_sel = Selector::parse("a").map_err(|e| format!("YIFY selector error: {e}"))?;
@@ -266,8 +265,7 @@ impl SubtitleProvider for YifyProvider {
 
             let search_url = format!(
                 "{YIFY_BASE_URL}/search?q={}",
-                url::form_urlencoded::byte_serialize(query.trim().as_bytes())
-                    .collect::<String>()
+                url::form_urlencoded::byte_serialize(query.trim().as_bytes()).collect::<String>()
             );
             let search_html = fetch_yify_html(&search_url).await?;
             let movie_path = {
@@ -311,15 +309,11 @@ impl SubtitleProvider for YifyProvider {
                 .select(&dl_sel)
                 .next()
                 .and_then(|a| a.value().attr("href"))
-                .ok_or_else(|| {
-                    "No download link found on YIFY subtitle detail page".to_string()
-                })?
+                .ok_or_else(|| "No download link found on YIFY subtitle detail page".to_string())?
                 .to_string();
             absolute_yify_url(&href)
         } else {
-            return Err(
-                "Either download_path or detail_path is required for YIFY download".into(),
-            );
+            return Err("Either download_path or detail_path is required for YIFY download".into());
         };
 
         let client = build_client()?;
@@ -350,6 +344,12 @@ impl SubtitleProvider for YifyProvider {
             .unwrap_or("subtitle.zip")
             .to_string();
 
-        extract_archive(&content, &archive_name, &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            &archive_name,
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

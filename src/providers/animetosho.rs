@@ -114,7 +114,12 @@ fn language_name(code: &str) -> &str {
 
 /// Derive the subtitle format from a filename extension.
 fn format_from_filename(name: &str) -> String {
-    match name.rsplit('.').next().map(|e| e.to_ascii_lowercase()).as_deref() {
+    match name
+        .rsplit('.')
+        .next()
+        .map(|e| e.to_ascii_lowercase())
+        .as_deref()
+    {
         Some("srt") => "srt".into(),
         Some("ass") => "ass".into(),
         Some("ssa") => "ssa".into(),

@@ -7,8 +7,8 @@ use scraper::{Html, Selector};
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
 use crate::models::{
-    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest,
-    SubtitleSearchRequest, SubtitleSearchResult,
+    matches_preferred_language, DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest,
+    SubtitleSearchResult,
 };
 
 const GREEKSUBS_BASE: &str = "https://greeksubs.net/";
@@ -194,10 +194,9 @@ impl SubtitleProvider for GreekSubsProvider {
                 .map_err(|e| format!("greeksubs selector error: {e}"))?;
             let mut data = std::collections::HashMap::new();
             for input in document.select(&input_sel) {
-                if let (Some(name), Some(value)) = (
-                    input.value().attr("name"),
-                    input.value().attr("value"),
-                ) {
+                if let (Some(name), Some(value)) =
+                    (input.value().attr("name"), input.value().attr("value"))
+                {
                     data.insert(name.to_string(), value.to_string());
                 }
             }
@@ -222,6 +221,12 @@ impl SubtitleProvider for GreekSubsProvider {
             .await
             .map_err(|e| format!("greeksubs read content error: {e}"))?;
 
-        extract_archive(&content, "subtitle.zip", &request.language, &self.staging_root).await
+        extract_archive(
+            &content,
+            "subtitle.zip",
+            &request.language,
+            &self.staging_root,
+        )
+        .await
     }
 }

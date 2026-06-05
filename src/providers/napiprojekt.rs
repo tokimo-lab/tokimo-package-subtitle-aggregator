@@ -76,10 +76,7 @@ impl SubtitleProvider for NapiprojektProvider {
             .map_err(|e| format!("napiprojekt: request failed: {e}"))?;
 
         if !response.status().is_success() {
-            return Err(format!(
-                "napiprojekt: HTTP {}",
-                response.status().as_u16()
-            ));
+            return Err(format!("napiprojekt: HTTP {}", response.status().as_u16()));
         }
 
         let content = response
@@ -149,10 +146,7 @@ impl SubtitleProvider for NapiprojektProvider {
             .map_err(|e| format!("napiprojekt: download request failed: {e}"))?;
 
         if !response.status().is_success() {
-            return Err(format!(
-                "napiprojekt: HTTP {}",
-                response.status().as_u16()
-            ));
+            return Err(format!("napiprojekt: HTTP {}", response.status().as_u16()));
         }
 
         let content = response

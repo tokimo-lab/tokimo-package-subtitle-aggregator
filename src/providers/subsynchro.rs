@@ -5,7 +5,9 @@ use serde::Deserialize;
 
 use super::SubtitleProvider;
 use crate::archive::extract_archive;
-use crate::models::{DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult};
+use crate::models::{
+    DownloadedSubtitle, SubtitleDownloadRequest, SubtitleSearchRequest, SubtitleSearchResult,
+};
 
 const SERVER_URL: &str = "https://www.subsynchro.com/include/ajax/subMarin.php";
 const PAGE_URL: &str = "https://www.subsynchro.com";
@@ -53,7 +55,9 @@ pub struct SubsynchroProvider {
 
 impl SubsynchroProvider {
     pub fn new(staging_root: impl Into<std::path::PathBuf>) -> Self {
-        Self { staging_root: staging_root.into() }
+        Self {
+            staging_root: staging_root.into(),
+        }
     }
 }
 
@@ -63,7 +67,10 @@ impl SubtitleProvider for SubsynchroProvider {
         "subsynchro"
     }
 
-    async fn search(&self, request: &SubtitleSearchRequest) -> Result<Vec<SubtitleSearchResult>, String> {
+    async fn search(
+        &self,
+        request: &SubtitleSearchRequest,
+    ) -> Result<Vec<SubtitleSearchResult>, String> {
         let title = request.query.clone().unwrap_or_default();
         if title.trim().is_empty() {
             return Err("subsynchro: search requires a query (movie title)".into());
@@ -82,7 +89,9 @@ impl SubtitleProvider for SubsynchroProvider {
             return Err(format!("subsynchro: HTTP {}", resp.status().as_u16()));
         }
 
-        let body: SubsynchroResponse = resp.json().await
+        let body: SubsynchroResponse = resp
+            .json()
+            .await
             .map_err(|e| format!("subsynchro: parse response: {e}"))?;
 
         if body.status.unwrap_or(0) != 200 {
@@ -92,11 +101,18 @@ impl SubtitleProvider for SubsynchroProvider {
 
         let mut results = Vec::new();
         for (idx, item) in body.data.into_iter().enumerate() {
-            let Some(download_url) = item.telechargement else { continue };
+            let Some(download_url) = item.telechargement else {
+                continue;
+            };
             let release = item.release.unwrap_or_default();
             let filename = item.filename.unwrap_or_default();
-            let name = if release.len() >= filename.len() { release.clone() } else { filename.clone() };
-            let movie_name = item.titre
+            let name = if release.len() >= filename.len() {
+                release.clone()
+            } else {
+                filename.clone()
+            };
+            let movie_name = item
+                .titre
                 .or(item.titre_original)
                 .unwrap_or_else(|| title.clone());
 
@@ -116,24 +132,42 @@ impl SubtitleProvider for SubsynchroProvider {
             });
         }
 
-        tracing::info!("subsynchro: found {} results for '{}'", results.len(), title);
+        tracing::info!(
+            "subsynchro: found {} results for '{}'",
+            results.len(),
+            title
+        );
         Ok(results)
     }
 
-    async fn download(&self, request: &SubtitleDownloadRequest) -> Result<DownloadedSubtitle, String> {
-        let url = request.download_path.as_deref()
+    async fn download(
+        &self,
+        request: &SubtitleDownloadRequest,
+    ) -> Result<DownloadedSubtitle, String> {
+        let url = request
+            .download_path
+            .as_deref()
             .or(request.detail_path.as_deref())
             .ok_or("subsynchro: download requires download_path")?;
 
         let client = build_client()?;
 
-        let resp = client.get(url).send().await
+        let resp = client
+            .get(url)
+            .send()
+            .await
             .map_err(|e| format!("subsynchro: download request: {e}"))?;
         if !resp.status().is_success() {
-            return Err(format!("subsynchro: download HTTP {}", resp.status().as_u16()));
+            return Err(format!(
+                "subsynchro: download HTTP {}",
+                resp.status().as_u16()
+            ));
         }
 
-        let bytes = resp.bytes().await.map_err(|e| format!("subsynchro: read response: {e}"))?;
+        let bytes = resp
+            .bytes()
+            .await
+            .map_err(|e| format!("subsynchro: read response: {e}"))?;
         let filename = url.rsplit('/').next().unwrap_or("subtitle.zip").to_string();
         extract_archive(&bytes, &filename, &request.language, &self.staging_root).await
     }

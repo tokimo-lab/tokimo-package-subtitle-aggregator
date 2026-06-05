@@ -3,8 +3,8 @@
 /// CID = SHA1 hash of the video file content (similar to ed2k CID)
 /// Note: different from XunleiClient (which is for torrent downloading)
 use async_trait::async_trait;
-use sha1::{Digest, Sha1};
 use serde::Deserialize;
+use sha1::{Digest, Sha1};
 
 use super::SubtitleProvider;
 use crate::models::{
