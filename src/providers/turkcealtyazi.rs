@@ -16,6 +16,12 @@ pub struct TurkcealtyaziProvider {
     staging_root: PathBuf,
 }
 
+impl Default for TurkcealtyaziProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TurkcealtyaziProvider {
     pub fn new() -> Self {
         Self {

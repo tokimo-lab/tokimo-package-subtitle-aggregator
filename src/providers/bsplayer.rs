@@ -10,6 +10,12 @@ const BSPLAYER_USER_AGENT: &str = "BSPlayer/2.x (1022.12360)";
 
 pub struct BsPlayerProvider;
 
+impl Default for BsPlayerProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BsPlayerProvider {
     pub fn new() -> Self {
         Self

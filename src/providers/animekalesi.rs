@@ -16,6 +16,12 @@ pub struct AnimekalesiProvider {
     staging_root: PathBuf,
 }
 
+impl Default for AnimekalesiProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AnimekalesiProvider {
     pub fn new() -> Self {
         Self {

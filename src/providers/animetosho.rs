@@ -133,6 +133,12 @@ fn format_from_filename(name: &str) -> String {
 
 pub struct AnimeToshoProvider;
 
+impl Default for AnimeToshoProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AnimeToshoProvider {
     pub fn new() -> Self {
         Self
@@ -240,9 +246,9 @@ impl SubtitleProvider for AnimeToshoProvider {
         // Only consider complete entries, most recent first, up to the limit.
         let mut complete_entries: Vec<EntryItem> = entries
             .into_iter()
-            .filter(|e| e.status.as_deref().map_or(true, |s| s == "complete"))
+            .filter(|e| e.status.as_deref().is_none_or(|s| s == "complete"))
             .collect();
-        complete_entries.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+        complete_entries.sort_by_key(|b| std::cmp::Reverse(b.timestamp));
         let entries_to_process = complete_entries
             .into_iter()
             .take(SEARCH_ENTRY_LIMIT)

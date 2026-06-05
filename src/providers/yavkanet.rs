@@ -16,6 +16,12 @@ pub struct YavkanetProvider {
     staging_root: PathBuf,
 }
 
+impl Default for YavkanetProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl YavkanetProvider {
     pub fn new() -> Self {
         Self {

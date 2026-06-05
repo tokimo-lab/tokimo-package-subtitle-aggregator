@@ -10,6 +10,12 @@ const SUBTIS_USER_AGENT: &str = "subtitle-aggregator/Subtis/0.9.2";
 
 pub struct SubtisProvider;
 
+impl Default for SubtisProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SubtisProvider {
     pub fn new() -> Self {
         Self

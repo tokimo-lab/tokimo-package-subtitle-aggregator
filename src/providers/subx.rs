@@ -40,6 +40,12 @@ pub struct SubxProvider {
     api_key: Option<String>,
 }
 
+impl Default for SubxProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SubxProvider {
     pub fn new() -> Self {
         let api_key = std::env::var("SUBX_API_KEY").ok();

@@ -137,10 +137,10 @@ impl SubtitleProvider for TitrariProvider {
             .get("content-disposition")
             .and_then(|v| v.to_str().ok())
             .and_then(|v| {
-                let re =
-                    regex::Regex::new(r#"filename[^;=\n]*=(?:(['"])(.+?)\1|([^;\n]*))"#).ok()?;
+                let re = regex::Regex::new(r#"filename[^;=\n]*=(?:"([^"]+)"|'([^']+)'|([^;\n]*))"#)
+                    .ok()?;
                 re.captures(v)
-                    .and_then(|c| c.get(2).or_else(|| c.get(3)))
+                    .and_then(|c| c.get(1).or_else(|| c.get(2)).or_else(|| c.get(3)))
                     .map(|m| m.as_str().trim().to_string())
             })
             .unwrap_or_else(|| format!("titrari_{}.zip", request.subtitle_id));
@@ -194,11 +194,7 @@ fn parse_titrari_results(html: &str, query: &str) -> Result<Vec<SubtitleSearchRe
         };
 
         // Title and year from parent table's h1 a
-        let parent_html = row.parent().and_then(|p| {
-            // Walk up to find the table row containing h1 a
-            // In practice, the h1 a is a sibling td's child
-            Some(p)
-        });
+        let parent_html = row.parent();
 
         // Try to get title from the document by looking at h1 a near this row
         // The Python code does: row.parent.select('h1 a')[0].text
@@ -242,8 +238,8 @@ fn parse_titrari_results(html: &str, query: &str) -> Result<Vec<SubtitleSearchRe
             imdb_re.captures(&all_text).map(|c| format!("tt{}", &c[1]))
         };
 
-        let name = if year.is_some() {
-            format!("{} ({})", title, year.unwrap())
+        let name = if let Some(y) = year {
+            format!("{} ({})", title, y)
         } else {
             title.clone()
         };

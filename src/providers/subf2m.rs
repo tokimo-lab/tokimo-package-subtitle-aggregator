@@ -349,8 +349,8 @@ impl SubtitleProvider for Subf2mProvider {
                 v.split(';').find_map(|part| {
                     let part = part.trim();
                     if part.to_ascii_lowercase().starts_with("filename") {
-                        part.splitn(2, '=')
-                            .nth(1)
+                        part.split_once('=')
+                            .map(|x| x.1)
                             .map(|s| s.trim().trim_matches('"').to_string())
                     } else {
                         None

@@ -47,6 +47,12 @@ fn val_to_string(v: &serde_json::Value) -> String {
 
 pub struct SuperSubtitlesProvider;
 
+impl Default for SuperSubtitlesProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SuperSubtitlesProvider {
     pub fn new() -> Self {
         Self

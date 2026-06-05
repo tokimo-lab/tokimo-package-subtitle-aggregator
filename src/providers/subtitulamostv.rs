@@ -12,6 +12,12 @@ const SUBTITULAMOS_USER_AGENT: &str =
 
 pub struct SubtitulamosTvProvider;
 
+impl Default for SubtitulamosTvProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SubtitulamosTvProvider {
     pub fn new() -> Self {
         Self
@@ -150,7 +156,7 @@ impl SubtitleProvider for SubtitulamosTvProvider {
                     let release_url = dl_links[0]
                         .value()
                         .attr("href")
-                        .map(|h| Self::absolute_url(h))
+                        .map(Self::absolute_url)
                         .unwrap_or_default();
 
                     let release_name = version

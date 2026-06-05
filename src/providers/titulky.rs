@@ -284,10 +284,10 @@ impl SubtitleProvider for TitulkyProvider {
             .get("content-disposition")
             .and_then(|v| v.to_str().ok())
             .and_then(|v| {
-                let re =
-                    regex::Regex::new(r#"filename[^;=\n]*=(?:(['"])(.+?)\1|([^;\n]*))"#).ok()?;
+                let re = regex::Regex::new(r#"filename[^;=\n]*=(?:"([^"]+)"|'([^']+)'|([^;\n]*))"#)
+                    .ok()?;
                 re.captures(v)
-                    .and_then(|c| c.get(2).or_else(|| c.get(3)))
+                    .and_then(|c| c.get(1).or_else(|| c.get(2)).or_else(|| c.get(3)))
                     .map(|m| m.as_str().trim().to_string())
             })
             .unwrap_or_else(|| format!("titulky_{}.zip", request.subtitle_id));

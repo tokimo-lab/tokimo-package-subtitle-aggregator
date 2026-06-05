@@ -12,6 +12,12 @@ const STAGING_ROOT: &str = "/tmp/subtitle-aggregator";
 
 pub struct NekurProvider;
 
+impl Default for NekurProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NekurProvider {
     pub fn new() -> Self {
         Self

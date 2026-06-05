@@ -84,9 +84,9 @@ impl SubtitleProvider for BetaSeriesProvider {
 
         let endpoint;
         let mut params: Vec<(&str, String)> = vec![
-            ("key".into(), api_key),
-            ("subtitles".into(), "1".into()),
-            ("v".into(), "3.0".into()),
+            ("key", api_key),
+            ("subtitles", "1".into()),
+            ("v", "3.0".into()),
         ];
 
         if let Some(id) = tvdb_id {

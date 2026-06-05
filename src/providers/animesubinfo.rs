@@ -17,6 +17,12 @@ pub struct AnimesubinfoProvider {
     staging_root: PathBuf,
 }
 
+impl Default for AnimesubinfoProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AnimesubinfoProvider {
     pub fn new() -> Self {
         Self {

@@ -66,6 +66,12 @@ struct PodnapisiSubtitle {
 
 pub struct PodnapisiProvider;
 
+impl Default for PodnapisiProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PodnapisiProvider {
     pub fn new() -> Self {
         Self

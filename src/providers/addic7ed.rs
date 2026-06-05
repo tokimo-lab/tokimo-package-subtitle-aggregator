@@ -409,8 +409,8 @@ fn parse_movie_rows(
             .map(|b| {
                 let t = b.text().collect::<String>().trim().to_string();
                 // Strip leading word (e.g. "Version", "Versión")
-                t.splitn(2, ' ')
-                    .nth(1)
+                t.split_once(' ')
+                    .map(|x| x.1)
                     .map(str::trim)
                     .unwrap_or("")
                     .to_string()

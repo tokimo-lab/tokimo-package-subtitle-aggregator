@@ -14,6 +14,12 @@ const HASH_CHUNK: usize = 64 * 1024; // 64KB
 
 pub struct TheSubDbProvider;
 
+impl Default for TheSubDbProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TheSubDbProvider {
     pub fn new() -> Self {
         Self

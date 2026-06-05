@@ -16,6 +16,12 @@ pub struct SubssabbzProvider {
     staging_root: PathBuf,
 }
 
+impl Default for SubssabbzProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SubssabbzProvider {
     pub fn new() -> Self {
         Self {
@@ -77,7 +83,7 @@ impl SubtitleProvider for SubssabbzProvider {
         ];
 
         let response = client
-            .post(&format!("{SUBSSABBZ_BASE_URL}/index.php?"))
+            .post(format!("{SUBSSABBZ_BASE_URL}/index.php?"))
             .header("Referer", &format!("{SUBSSABBZ_BASE_URL}/"))
             .form(&params)
             .send()

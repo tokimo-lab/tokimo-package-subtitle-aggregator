@@ -102,6 +102,12 @@ fn language_name(lang: &str) -> String {
 
 pub struct GestdownProvider;
 
+impl Default for GestdownProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GestdownProvider {
     pub fn new() -> Self {
         Self

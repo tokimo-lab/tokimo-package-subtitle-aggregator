@@ -18,6 +18,12 @@ const USER_AGENT: &str =
 
 pub struct TvSubtitlesProvider;
 
+impl Default for TvSubtitlesProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TvSubtitlesProvider {
     pub fn new() -> Self {
         Self
@@ -195,7 +201,7 @@ async fn search_show_id(client: &Client, query: &str) -> Result<Option<(u64, Str
         let text: String = anchor.text().collect::<String>().trim().to_string();
         if let Some(caps) = link_re.captures(&text) {
             let series_name = caps.name("series").map(|m| m.as_str()).unwrap_or("");
-            if series_name.to_ascii_lowercase() == query.to_ascii_lowercase() {
+            if series_name.eq_ignore_ascii_case(query) {
                 return Ok(Some((show_id, series_name.to_string())));
             }
         }
@@ -305,7 +311,7 @@ async fn get_episode_subtitles(
     for row in document.select(&row_sel) {
         // subtitle_id from parent anchor href: /subtitle-123.html
         let subtitle_id = {
-            let parent_html = row.parent().and_then(|p| scraper::ElementRef::wrap(p));
+            let parent_html = row.parent().and_then(scraper::ElementRef::wrap);
             match parent_html {
                 Some(parent) => {
                     let href = parent.value().attr("href").unwrap_or("");
@@ -325,7 +331,7 @@ async fn get_episode_subtitles(
             .select(&img_sel)
             .next()
             .and_then(|img| img.value().attr("src"))
-            .and_then(|src| extract_lang_from_img_src(src))
+            .and_then(extract_lang_from_img_src)
             .unwrap_or_else(|| "en".to_string());
 
         // Rip from <p title="rip">
@@ -399,7 +405,7 @@ fn extract_from_zip(bytes: &[u8]) -> Result<(Vec<u8>, String), String> {
     let cursor = Cursor::new(bytes);
     let mut zip =
         ZipArchive::new(cursor).map_err(|e| format!("tvsubtitles: zip open failed: {e}"))?;
-    if zip.len() == 0 {
+    if zip.is_empty() {
         return Err("tvsubtitles: zip archive is empty".to_string());
     }
     let mut file = zip

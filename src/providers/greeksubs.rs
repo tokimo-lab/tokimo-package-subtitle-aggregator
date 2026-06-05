@@ -99,7 +99,7 @@ impl SubtitleProvider for GreekSubsProvider {
                 .attr("onclick")
                 .or_else(|| {
                     row.children()
-                        .filter_map(|n| scraper::ElementRef::wrap(n))
+                        .filter_map(scraper::ElementRef::wrap)
                         .find_map(|el| el.value().attr("onclick"))
                 })
                 .unwrap_or("");

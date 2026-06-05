@@ -31,6 +31,12 @@ fn get_subhash(hash: &str) -> String {
 
 pub struct NapiprojektProvider;
 
+impl Default for NapiprojektProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NapiprojektProvider {
     pub fn new() -> Self {
         Self

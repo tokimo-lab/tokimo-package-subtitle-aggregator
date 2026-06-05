@@ -32,6 +32,12 @@ fn parse_season_episode(s: &str) -> (u32, u32) {
 
 pub struct HosszupuskaProvider;
 
+impl Default for HosszupuskaProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HosszupuskaProvider {
     pub fn new() -> Self {
         Self

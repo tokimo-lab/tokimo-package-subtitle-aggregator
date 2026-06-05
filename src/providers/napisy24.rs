@@ -14,6 +14,12 @@ pub struct Napisy24Provider {
     password: String,
 }
 
+impl Default for Napisy24Provider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Napisy24Provider {
     pub fn new() -> Self {
         let username = std::env::var("NAPISY24_USER").unwrap_or_else(|_| "subliminal".into());

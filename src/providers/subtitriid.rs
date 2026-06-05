@@ -11,6 +11,12 @@ const STAGING_ROOT: &str = "/tmp/subtitle-aggregator";
 
 pub struct SubtitriIdProvider;
 
+impl Default for SubtitriIdProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SubtitriIdProvider {
     pub fn new() -> Self {
         Self

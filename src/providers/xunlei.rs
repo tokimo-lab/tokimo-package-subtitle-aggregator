@@ -33,6 +33,12 @@ struct XunleiSubItem {
 
 pub struct XunleiSubtitleProvider;
 
+impl Default for XunleiSubtitleProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl XunleiSubtitleProvider {
     pub fn new() -> Self {
         Self

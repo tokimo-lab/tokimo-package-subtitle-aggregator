@@ -16,6 +16,12 @@ pub struct SubsunacsProvider {
     staging_root: PathBuf,
 }
 
+impl Default for SubsunacsProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SubsunacsProvider {
     pub fn new() -> Self {
         Self {
@@ -83,7 +89,7 @@ impl SubtitleProvider for SubsunacsProvider {
         ];
 
         let response = client
-            .post(&format!("{SUBSUNACS_BASE_URL}/search.php"))
+            .post(format!("{SUBSUNACS_BASE_URL}/search.php"))
             .header("Referer", &format!("{SUBSUNACS_BASE_URL}/index.php"))
             .form(&params)
             .send()

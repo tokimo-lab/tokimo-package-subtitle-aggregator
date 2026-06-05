@@ -121,10 +121,10 @@ impl SubtitleProvider for SubsRoProvider {
             .get("content-disposition")
             .and_then(|v| v.to_str().ok())
             .and_then(|v| {
-                let re =
-                    regex::Regex::new(r#"filename[^;=\n]*=(?:(['"])(.+?)\1|([^;\n]*))"#).ok()?;
+                let re = regex::Regex::new(r#"filename[^;=\n]*=(?:"([^"]+)"|'([^']+)'|([^;\n]*))"#)
+                    .ok()?;
                 re.captures(v)
-                    .and_then(|c| c.get(2).or_else(|| c.get(3)))
+                    .and_then(|c| c.get(1).or_else(|| c.get(2)).or_else(|| c.get(3)))
                     .map(|m| m.as_str().trim().to_string())
             })
             .unwrap_or_else(|| format!("subsro_{}.zip", request.subtitle_id));
@@ -166,6 +166,8 @@ fn parse_subsro_results(
     let year_re = Regex::new(r"\((\d{4})\)").map_err(|e| format!("SubsRo: regex error: {e}"))?;
     let season_re =
         Regex::new(r"Sezonul\s*(\d+)").map_err(|e| format!("SubsRo: regex error: {e}"))?;
+    let title_strip_re = Regex::new(r"\s*(-\s*Sezonul\s*\d+)?\s*\(\d{4}\).*$")
+        .map_err(|e| format!("SubsRo: regex error: {e}"))?;
 
     for (index, item) in document.select(&item_sel).enumerate() {
         // Determine language from flag image
@@ -223,10 +225,12 @@ fn parse_subsro_results(
         }
 
         // Strip season suffix and year: "Title - Sezonul 2 (2021)" → "Title"
-        let title = Regex::new(r"\s*(-\s*Sezonul\s*\d+)?\s*\(\d{4}\).*$")
-            .ok()
-            .and_then(|re| Some(re.replace(&title_raw, "").trim().to_string()))
-            .unwrap_or_else(|| title_raw.clone());
+        let title = title_strip_re.replace(&title_raw, "").trim().to_string();
+        let title = if title.is_empty() {
+            title_raw.clone()
+        } else {
+            title
+        };
 
         let year: Option<u64> = year_re
             .captures(&title_raw)

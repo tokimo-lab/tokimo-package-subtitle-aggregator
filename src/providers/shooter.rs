@@ -15,6 +15,12 @@ const SHOOTER_API_URL: &str = "https://www.shooter.cn/api/subapi.php";
 /// compute MD5 of each block, join with ";".
 pub struct ShooterProvider;
 
+impl Default for ShooterProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ShooterProvider {
     pub fn new() -> Self {
         Self
